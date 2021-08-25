@@ -1,8 +1,8 @@
 # cirnoprism
 
 ## Required libraries
-GLEW
-GLFW
-GLM
-SDL2
-SOIL2
+GLEW<br>
+GLFW<br>
+GLM<br>
+SDL2<br>
+SOIL2<br>
