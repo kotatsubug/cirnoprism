@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\shader.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\framebuffer.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\camera.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="collision.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs\ecs_component.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs\ecs.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs\ecs_system.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\mesh.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\sdl\sdl_application.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\sdl\sdl_window.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\sdl\sdl_timing.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\opengl\gl_render_device.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\color.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libs.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\shader.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\texture.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\material.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\mesh.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\primitives.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\camera.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="math.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\model.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="objloader.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\light.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\framebuffer.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="collision.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\ecs_component.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\ecs_system.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\ecs.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\vertex.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\transform.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input_control.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\sdl\sdl_application.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\sdl\sdl_window.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\sdl\sdl_timing.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\opengl\gl_render_device.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\color.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="glew32.dll" />
+    <None Include="glfw3.dll" />
+    <None Include="shaders\fragment_core.glsl" />
+    <None Include="shaders\vertex_core.glsl" />
+    <None Include="shaders\shadow.vert" />
+    <None Include="shaders\shadow.frag" />
+    <None Include="shaders\framebuffer.vert" />
+    <None Include="shaders\framebuffer.frag" />
+  </ItemGroup>
+</Project>
