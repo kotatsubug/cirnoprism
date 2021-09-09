@@ -3,9 +3,8 @@
 #include "ecs_component.hh"
 #include "ecs_system.hh"
 
-#include "../common.hh"
-
 #include <map>
+#include <iostream> // TODO: REMOVE
 
 #define NULL_COPY_AND_ASSIGN(T) \
 	T(const T& other) {(void)other;} \

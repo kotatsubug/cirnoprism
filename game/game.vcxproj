@@ -88,14 +88,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\linking\sdl2\include;$(SolutionDir)\linking\soil2\include;$(SolutionDir)\linking\glm\include;$(SolutionDir)\linking\glfw\include;$(SolutionDir)\linking\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\game\src;$(SolutionDir)\linking\openal\include;$(SolutionDir)\linking\soil2\include;$(SolutionDir)\linking\glm\include;$(SolutionDir)\linking\glfw\include;$(SolutionDir)\linking\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\linking\sdl2\lib\x86;$(SolutionDir)\linking\soil2\lib;$(SolutionDir)\linking\glfw\lib;$(SolutionDir)\linking\glew\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;opengl32.lib;glfw3.lib;glew32.lib;soil2-debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\linking\openal\lib\x86;$(SolutionDir)\linking\soil2\lib;$(SolutionDir)\linking\glfw\lib;$(SolutionDir)\linking\glew\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32.lib;soil2-debug.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -147,59 +147,48 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="platform\opengl\gl_render_device.cc" />
-    <ClCompile Include="platform\sdl\sdl_application.cc" />
-    <ClCompile Include="platform\sdl\sdl_timing.cc" />
-    <ClCompile Include="platform\sdl\sdl_window.cc" />
-    <ClCompile Include="renderer\camera.cc" />
-    <ClCompile Include="collision.cc" />
-    <ClCompile Include="ecs\ecs.cc" />
-    <ClCompile Include="ecs\ecs_component.cc" />
-    <ClCompile Include="ecs\ecs_system.cc" />
-    <ClCompile Include="game.cc" />
+    <ClCompile Include="src\renderer\camera.cc" />
+    <ClCompile Include="src\ecs\ecs.cc" />
+    <ClCompile Include="src\ecs\ecs_component.cc" />
+    <ClCompile Include="src\ecs\ecs_system.cc" />
+    <ClCompile Include="src\game.cc" />
     <ClCompile Include="main.cc" />
-    <ClCompile Include="renderer\mesh.cc" />
-    <ClCompile Include="renderer\shader.cc" />
-    <ClCompile Include="renderer\framebuffer.cc" />
-    <ClCompile Include="util\color.cc" />
+    <ClCompile Include="src\renderer\mesh.cc" />
+    <ClCompile Include="src\renderer\shader.cc" />
+    <ClCompile Include="src\renderer\framebuffer.cc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common.hh" />
-    <ClInclude Include="input_control.hh" />
-    <ClInclude Include="platform\opengl\gl_render_device.hh" />
-    <ClInclude Include="platform\sdl\sdl_application.hh" />
-    <ClInclude Include="platform\sdl\sdl_timing.hh" />
-    <ClInclude Include="platform\sdl\sdl_window.hh" />
-    <ClInclude Include="renderer\camera.hh" />
-    <ClInclude Include="collision.hh" />
-    <ClInclude Include="ecs\ecs.hh" />
-    <ClInclude Include="ecs\ecs_component.hh" />
-    <ClInclude Include="ecs\ecs_system.hh" />
-    <ClInclude Include="renderer\framebuffer.hh" />
-    <ClInclude Include="game.hh" />
-    <ClInclude Include="libs.hh" />
-    <ClInclude Include="renderer\light.hh" />
-    <ClInclude Include="renderer\material.hh" />
-    <ClInclude Include="math.hh" />
-    <ClInclude Include="renderer\mesh.hh" />
-    <ClInclude Include="renderer\model.hh" />
-    <ClInclude Include="objloader.hh" />
-    <ClInclude Include="renderer\primitives.hh" />
-    <ClInclude Include="renderer\shader.hh" />
-    <ClInclude Include="renderer\texture.hh" />
-    <ClInclude Include="renderer\transform.hh" />
-    <ClInclude Include="renderer\vertex.hh" />
-    <ClInclude Include="util\color.hh" />
+    <ClInclude Include="src\common.hh" />
+    <ClInclude Include="src\input_control.hh" />
+    <ClInclude Include="src\renderer\camera.hh" />
+    <ClInclude Include="src\ecs\ecs.hh" />
+    <ClInclude Include="src\ecs\ecs_component.hh" />
+    <ClInclude Include="src\ecs\ecs_system.hh" />
+    <ClInclude Include="src\renderer\framebuffer.hh" />
+    <ClInclude Include="src\game.hh" />
+    <ClInclude Include="src\libs.hh" />
+    <ClInclude Include="src\renderer\light.hh" />
+    <ClInclude Include="src\renderer\material.hh" />
+    <ClInclude Include="src\math.hh" />
+    <ClInclude Include="src\renderer\mesh.hh" />
+    <ClInclude Include="src\renderer\model.hh" />
+    <ClInclude Include="src\objloader.hh" />
+    <ClInclude Include="src\renderer\primitives.hh" />
+    <ClInclude Include="src\renderer\shader.hh" />
+    <ClInclude Include="src\renderer\texture.hh" />
+    <ClInclude Include="src\renderer\transform.hh" />
+    <ClInclude Include="src\renderer\vertex.hh" />
   </ItemGroup>
   <ItemGroup>
     <None Include="glew32.dll" />
     <None Include="glfw3.dll" />
-    <None Include="shaders\fragment_core.glsl" />
-    <None Include="shaders\shadow.frag" />
-    <None Include="shaders\framebuffer.frag" />
-    <None Include="shaders\framebuffer.vert" />
-    <None Include="shaders\vertex_core.glsl" />
-    <None Include="shaders\shadow.vert" />
+    <None Include="OpenAL32.dll" />
+    <None Include="res\shaders\fragment_core.glsl" />
+    <None Include="res\shaders\shadow.frag" />
+    <None Include="res\shaders\framebuffer.frag" />
+    <None Include="res\shaders\framebuffer.vert" />
+    <None Include="res\shaders\vertex_core.glsl" />
+    <None Include="res\shaders\shadow.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

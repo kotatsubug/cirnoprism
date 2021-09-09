@@ -3,6 +3,8 @@
 #include <vector>
 #include <tuple>
 
+#include "common.hh"
+
 struct BaseECSComponent;
 typedef void* EntityHandle;
 typedef uint32_t (*ECSComponentCreateFunction)(std::vector<uint8_t>& memory, EntityHandle entity, BaseECSComponent* comp);
