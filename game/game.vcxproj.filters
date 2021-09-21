@@ -42,6 +42,9 @@
     <ClCompile Include="src\renderer\mesh.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\physics\quickhull.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\libs.hh">
@@ -104,6 +107,12 @@
     <ClInclude Include="src\common.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\sound\dr_wav.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\quickhull.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glew32.dll" />
@@ -115,5 +124,10 @@
     <None Include="res\shaders\framebuffer.vert" />
     <None Include="res\shaders\framebuffer.frag" />
     <None Include="OpenAL32.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

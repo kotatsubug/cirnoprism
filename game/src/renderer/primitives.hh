@@ -10,8 +10,8 @@
 class Primitive
 {
 private:
-	std::vector<Vertex> vertices;
-	std::vector<GLuint> indices;
+	std::vector<Vertex> _vertices;
+	std::vector<GLuint> _indices;
 public:
 	Primitive()
 	{
@@ -32,19 +32,19 @@ public:
 	{
 		for (size_t i = 0; i < numberOfVertices; i++)
 		{
-			this->vertices.push_back(vertices[i]);
+			_vertices.push_back(vertices[i]);
 		}
 
 		for (size_t i = 0; i < numberOfIndices; i++)
 		{
-			this->indices.push_back(indices[i]);
+			_indices.push_back(indices[i]);
 		}
 	}
 
-	inline Vertex* GetVertices() { return this->vertices.data(); }
-	inline GLuint* GetIndices() { return this->indices.data(); }
-	inline unsigned GetNumberOfVertices() const { return this->vertices.size(); }
-	inline unsigned GetNumberOfIndices() const { return this->indices.size(); }
+	inline Vertex* GetVertices() { return _vertices.data(); }
+	inline GLuint* GetIndices() { return _indices.data(); }
+	inline unsigned GetNumberOfVertices() const { return _vertices.size(); }
+	inline unsigned GetNumberOfIndices() const { return _indices.size(); }
 };
 
 class Quad : public Primitive

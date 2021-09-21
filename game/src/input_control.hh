@@ -22,5 +22,5 @@ inline void InputControl::AddAmt(float val)
 
 inline float InputControl::GetAmt()
 {
-	return Math::clamp(_amt, -1.0f, 1.0f);
+	return Math::Clamp(_amt, -1.0f, 1.0f);
 }

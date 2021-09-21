@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\physics\quickhull.cc" />
     <ClCompile Include="src\renderer\camera.cc" />
     <ClCompile Include="src\ecs\ecs.cc" />
     <ClCompile Include="src\ecs\ecs_component.cc" />
@@ -160,6 +161,7 @@
   <ItemGroup>
     <ClInclude Include="src\common.hh" />
     <ClInclude Include="src\input_control.hh" />
+    <ClInclude Include="src\physics\quickhull.hh" />
     <ClInclude Include="src\renderer\camera.hh" />
     <ClInclude Include="src\ecs\ecs.hh" />
     <ClInclude Include="src\ecs\ecs_component.hh" />
@@ -178,6 +180,7 @@
     <ClInclude Include="src\renderer\texture.hh" />
     <ClInclude Include="src\renderer\transform.hh" />
     <ClInclude Include="src\renderer\vertex.hh" />
+    <ClInclude Include="src\sound\dr_wav.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="glew32.dll" />
@@ -189,6 +192,9 @@
     <None Include="res\shaders\framebuffer.vert" />
     <None Include="res\shaders\vertex_core.glsl" />
     <None Include="res\shaders\shadow.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,12 +3,12 @@
 #include <iostream>
 #include <vector>
 
-#include "vertex.hh"
-#include "shader.hh"
-#include "texture.hh"
-#include "material.hh"
-#include "primitives.hh"
-#include "../objloader.hh"
+#include "renderer/vertex.hh"
+#include "renderer/shader.hh"
+#include "renderer/texture.hh"
+#include "renderer/material.hh"
+#include "renderer/primitives.hh"
+#include "objloader.hh"
 
 class Mesh
 {

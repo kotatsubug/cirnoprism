@@ -1,5 +1,8 @@
 #include "game.hh"
 
+#define DR_WAV_IMPLEMENTATION
+#include "sound/dr_wav.h"
+
 void Game::_InitGLFW()
 {
 	if (glfwInit() == GLFW_FALSE)
@@ -59,7 +62,7 @@ void Game::_InitGLFlags()
 
 	glEnable(GL_CULL_FACE);
 	//glCullFace(GL_BACK);
-	glCullFace(GL_FRONT);
+	glCullFace(GL_FRONT); // TODO: Only do frontface culling when calculating lighting pass in deferred shading model
 	glFrontFace(GL_CW);
 	//glFrontFace(GL_CCW);
 
@@ -146,9 +149,9 @@ void Game::_InitModels()
 	std::vector<Mesh*> meshes;
 	std::vector<Mesh*> meshes2;
 
-	std::vector<Vertex> torus = LoadOBJ("res/models/matoshi.obj");
+	std::vector<Vertex> matoshi = ImportOBJ("res/models/matoshi.obj");
 	meshes.push_back(new Mesh(
-		torus.data(), torus.size(),
+		matoshi.data(), matoshi.size(),
 		NULL, 0,
 		glm::vec3(0.0f, -1.0f, -5.0f),
 		glm::vec3(0.0f),
@@ -170,29 +173,48 @@ void Game::_InitModels()
 	};
 
 	quad->Set(planeVertices, (sizeof(planeVertices) / sizeof(Vertex)), 0, NULL);
-	
-//	for (int x = -16; x < 16; x++)
-//	{
-//		for (int z = -16; z < 16; z++)
-//		{
-//			meshes2.push_back(new Mesh(
-//				quad,
-//				glm::vec3(x, z, -1.0f),
-//				glm::vec3(0.0f, -1.0f, 0.0f),
-//				glm::vec3(-90.0f, 0.0f, 0.0f),
-//				glm::vec3(1.0f)
-//			));
-			meshes2.push_back(new Mesh(
-				quad,
-				glm::vec3(0.0f, -1.0f, 0.0f),
-				glm::vec3(0.0f, -1.0f, 0.0f),
-				glm::vec3(0.0f, 0.0f, 0.0f),
-				glm::vec3(1.0f)
-			));
-//		}
-//	}
+
+	meshes2.push_back(new Mesh(
+		quad,
+		glm::vec3(0.0f, -1.0f, 0.0f),
+		glm::vec3(0.0f, -1.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f)
+	));
 
 	delete quad;
+
+	// Convex hull experimentation
+		QuickHull qh;
+		std::vector<glm::vec3> pointCloud = ImportOBJVertices("res/models/matoshi.obj");
+		ConvexHull hull = qh.GetConvexHull(pointCloud, false);
+		hull.WriteWaveformOBJ("res/models/convex_hull.obj");
+		/// Next step: make VertexDataSource return a vec3 array or something so you can feed it into Mesh constructor!!
+
+	//	std::vector<Vertex> PCVB2;
+	//	for (size_t x = 0; x < PCVB.size(); x++)
+	//	{
+	//		Vertex v;
+	//		v.position = PCVB[x];
+	//		v.color = glm::vec3(1.0f);
+	//		v.normal = glm::vec3(0.0f); // Could be a problem...?
+	//		v.texcoord = glm::vec2(0.0f);
+	//		DEBUG_LOG("TEMP", LOG_WARNING, "Logged vertex position for iteration %i as [%f, %f, %f]", x, PCVB[x].x, PCVB[x].y, PCVB[x].z);
+	//		PCVB2.push_back(v);
+	//	}
+	//
+	//	meshes.push_back(new Mesh(
+	//		PCVB2.data(),
+	//		PCVB2.size(),
+	//		NULL,
+	//		0,
+	//		glm::vec3(0.0f, 0.0f, 0.0f),
+	//		glm::vec3(0.0f),
+	//		glm::vec3(0.0f),
+	//		glm::vec3(1.0f)
+	//	));
+
+
 
 	_models.push_back(new Model(
 		glm::vec3(0.0f),
@@ -405,11 +427,11 @@ void Game::_UpdateInputKeyboard()
 	}
 	if (glfwGetKey(_window, GLFW_KEY_Y) == GLFW_PRESS)
 	{
-		_models[0]->Scale(glm::vec3(0.1));
+		_models[0]->Scale(glm::vec3(0.1f));
 	}
 	if (glfwGetKey(_window, GLFW_KEY_U) == GLFW_PRESS)
 	{
-		_models[0]->Scale(glm::vec3(-0.1));
+		_models[0]->Scale(glm::vec3(-0.1f));
 	}
 
 
@@ -472,12 +494,24 @@ void Game::_InitSoundSystem()
 	}
 	OpenAL_ErrorCheck("Make context current");
 
-	// TODO: Listener
+	// Create listener
+	alec(alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f));
+	alec(alListener3f(AL_VELOCITY, 0.0f, 0.0f, 0.0f));
+	ALfloat forwardAndUpVectors[] =
+	{
+		/* FORWARD */ 1.0f, 0.0f, 0.0f,
+		/* UP */	  0.0f, 1.0f, 0.0f
+	};
+	alec(alListenerfv(AL_ORIENTATION, forwardAndUpVectors));
+
+	// Create buffers that hold the sound data
+	// These are shared between contexts and are defined at device level
+	
 
 
+	// TODO: Create WAV
 
-
-
+	
 
 
 

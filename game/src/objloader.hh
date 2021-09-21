@@ -23,7 +23,10 @@
 
 enum OBJ_INDICES_TYPE { VERTS_ONLY = 0, VERTS_INDICES, VERTS_TEXCOORDS_NORMALS };
 
-static std::vector<Vertex> LoadOBJ(const std::string& filename)
+// TODO: This importer does not auto-triangulate quads yet!
+
+/// Returns an array of Vertex structs -- vectors of vertices, texture coordinates (if they exist), and normals (if they exist) -- from an OBJ file.
+static std::vector<Vertex> ImportOBJ(const std::string& filename) noexcept
 {
 	// Vertex stuff
 	std::vector<glm::fvec3> vertex_positions;
@@ -124,6 +127,7 @@ finished_setting_obj_indices_type:
 		ss.str(line);
 		ss >> prefix;
 
+		// TODO: See if there's a better way to handle if/else-if w/ C strings
 		if (prefix == "#")
 		{
 			// Ignore, this is a comment
@@ -263,7 +267,56 @@ finished_setting_obj_indices_type:
 
 	in_file.close();
 
-	DEBUG_LOG("OBJLoader", LOG_SUCCESS, "Model [%s] loaded in format [%i] with [%i] vertices!", filename.c_str(), format, vertices.size());
+	DEBUG_LOG("OBJLoader", LOG_SUCCESS, "Model [%s] loaded in format [%i] with [%i] vertices, [%i] texcoords, and [%i] normals!", filename.c_str(), format, vertex_positions.size(), vertex_texcoords.size(), vertex_normals.size());
 
 	return vertices;
+}
+
+/// Returns an array of just the position vectors from the vertex data of an OBJ file.
+/// Used in algorithms like QuickHull to shrink-wrap models for collision meshes, where texcoords/normals/indices are not needed.
+static std::vector<glm::vec3> ImportOBJVertices(const std::string& filename) noexcept
+{
+	std::vector<glm::vec3> positions;
+
+	std::stringstream ss;
+	std::ifstream in_file(filename);
+	std::string line = "";
+	std::string prefix = "";
+	glm::vec3 temp_vec3;
+	GLint temp_glint = 0;
+
+	if (!std::filesystem::exists(filename))
+	{
+		DEBUG_LOG("OBJLoader", LOG_ERROR, "Could not open [%s] (file does not exist)", filename.c_str());
+		return positions;
+	}
+
+	if (!in_file.is_open())
+	{
+		DEBUG_LOG("OBJLoader", LOG_ERROR, "Could not open [%s] (file could not be read)", filename.c_str());
+		return positions;
+	}
+
+	in_file.seekg(0, in_file.beg); // Send stream to start of file so vertices can be read
+
+	// For every new line in the file...
+	while (std::getline(in_file, line))
+	{
+		// ...get the prefix of the line, and collect values to the correct array
+		ss.clear();
+		ss.str(line);
+		ss >> prefix;
+
+		if (prefix == "v")
+		{
+			ss >> temp_vec3.x >> temp_vec3.y >> temp_vec3.z;
+			positions.push_back(temp_vec3);
+		}
+	}
+
+	in_file.close();
+
+	DEBUG_LOG("OBJLoader", LOG_SUCCESS, "Vertex data from [%s] loaded with [%i] vertices!", filename.c_str(), positions.size());
+
+	return positions;
 }

@@ -1,23 +1,21 @@
 #pragma once
 
-#include "../libs.hh"
+#include "libs.hh"
 
 class Light
 {
 protected:
-	glm::vec3 color;
-	float intensity;
-	
+	glm::vec3 _color;
+	float _intensity;
 public:
 	Light(glm::vec3 color, float intensity)
 	{
-		this->color = color;
-		this->intensity = intensity;
+		_color = color;
+		_intensity = intensity;
 	}
 
 	~Light()
 	{
-
 	}
 
 	virtual void SendToShader(Shader& program) = 0;
@@ -26,17 +24,17 @@ public:
 class PointLight : Light
 {
 protected:
-	glm::vec3 position;
-	float constant, linear, quadratic;
+	glm::vec3 _position;
+	float _constant, _linear, _quadratic;
 public:
 	PointLight(glm::vec3 position, glm::vec3 color = glm::vec3(1.0f), float intensity = 1.0f,
 		float constant = 1.0f, float linear = 0.045f, float quadratic = 0.0075f)
 		: Light(color, intensity)
 	{
-		this->position = position;
-		this->constant = constant;
-		this->linear = linear;
-		this->quadratic = quadratic;
+		_position = position;
+		_constant = constant;
+		_linear = linear;
+		_quadratic = quadratic;
 	}
 
 	~PointLight()
@@ -46,16 +44,16 @@ public:
 
 	void SendToShader(Shader& program)
 	{
-		program.SetVec3f(this->position, "pointLight.position");
-		program.SetVec3f(this->color, "pointLight.color");
-		program.Set1f(this->intensity, "pointLight.intensity");
-		program.Set1f(this->constant, "pointLight.constant");
-		program.Set1f(this->linear, "pointLight.linear");
-		program.Set1f(this->quadratic, "pointLight.quadratic");
+		program.SetVec3f(_position, "pointLight.position");
+		program.SetVec3f(_color, "pointLight.color");
+		program.Set1f(_intensity, "pointLight.intensity");
+		program.Set1f(_constant, "pointLight.constant");
+		program.Set1f(_linear, "pointLight.linear");
+		program.Set1f(_quadratic, "pointLight.quadratic");
 	}
 
 	void SetPosition(const glm::vec3 val)
 	{
-		this->position = val;
+		_position = val;
 	}
 };

@@ -1,19 +1,19 @@
 #pragma once
 
-#include "shader.hh"
-#include "texture.hh"
-#include "material.hh"
-#include "mesh.hh"
-#include "../objloader.hh"
+#include "renderer/shader.hh"
+#include "renderer/texture.hh"
+#include "renderer/material.hh"
+#include "renderer/mesh.hh"
+#include "objloader.hh"
 
 class Model
 {
 private:
-	Material* material;
-	Texture* overrideTextureDiffuse;
-	Texture* overrideTextureSpecular;
-	std::vector<Mesh*> meshes;
-	glm::vec3 position;
+	Material* _material;
+	Texture* _overrideTextureDiffuse;
+	Texture* _overrideTextureSpecular;
+	std::vector<Mesh*> _meshes;
+	glm::vec3 _position;
 public:
 	Model(
 		glm::vec3 position,
@@ -23,20 +23,20 @@ public:
 		std::vector<Mesh*>& meshes
 	)
 	{
-		this->position = position;
-		this->material = material;
-		this->overrideTextureDiffuse = orTexDiff;
-		this->overrideTextureSpecular = orTexSpec;
+		_position = position;
+		_material = material;
+		_overrideTextureDiffuse = orTexDiff;
+		_overrideTextureSpecular = orTexSpec;
 
 		for (auto* i : meshes)
 		{
-			this->meshes.push_back(new Mesh(*i));
+			_meshes.push_back(new Mesh(*i));
 		}
 
-		for (auto& i : this->meshes)
+		for (auto& i : _meshes)
 		{
-			i->Translate(this->position);
-			i->SetOrigin(this->position);
+			i->Translate(_position);
+			i->SetOrigin(_position);
 		}
 	}
 
@@ -48,34 +48,34 @@ public:
 		const char* objFile
 	)
 	{
-		this->position = position;
-		this->material = material;
-		this->overrideTextureDiffuse = orTexDiff;
-		this->overrideTextureSpecular = orTexSpec;
+		_position = position;
+		_material = material;
+		_overrideTextureDiffuse = orTexDiff;
+		_overrideTextureSpecular = orTexSpec;
 
-		std::vector<Vertex> object = LoadOBJ(objFile);
-		this->meshes.push_back(new Mesh(object.data(), object.size(), NULL, 0, glm::vec3(1.0f, 0.0f, 0.0f),
+		std::vector<Vertex> object = ImportOBJ(objFile);
+		_meshes.push_back(new Mesh(object.data(), object.size(), NULL, 0, glm::vec3(1.0f, 0.0f, 0.0f),
 			glm::vec3(0.0f),
 			glm::vec3(0.0f),
 			glm::vec3(1.0f)
 		));
 
-		for (auto& i : this->meshes)
+		for (auto& i : _meshes)
 		{
-			i->Translate(this->position);
-			i->SetOrigin(this->position);
+			i->Translate(_position);
+			i->SetOrigin(_position);
 		}
 	}
 
 	~Model()
 	{
-		for (auto*& i : this->meshes)
+		for (auto*& i : _meshes)
 			delete i;
 	}
 
 	void Translate(const glm::vec3 val)
 	{
-		for (auto& i : this->meshes)
+		for (auto& i : _meshes)
 		{
 			i->Translate(val);
 		}
@@ -83,7 +83,7 @@ public:
 
 	void Rotate(const glm::vec3 val)
 	{
-		for (auto& i : this->meshes)
+		for (auto& i : _meshes)
 		{
 			i->Rotate(val);
 		}
@@ -91,7 +91,7 @@ public:
 
 	void Scale(const glm::vec3 val)
 	{
-		for (auto& i : this->meshes)
+		for (auto& i : _meshes)
 		{
 			i->Scale(val);
 		}
@@ -99,17 +99,17 @@ public:
 
 	void Draw(Shader* shader)
 	{
-		this->material->SendToShader(*shader);
+		_material->SendToShader(*shader);
 
 		// Use the program -- should be AFTER calling Set functions from the shader class, since they Use and UnUse the program!!
 		shader->Use();
 
 		// Draw
-		for (auto& i : this->meshes)
+		for (auto& i : _meshes)
 		{
 			// Activate a texture
-			this->overrideTextureDiffuse->Bind(0);
-			this->overrideTextureSpecular->Bind(1);
+			_overrideTextureDiffuse->Bind(0);
+			_overrideTextureSpecular->Bind(1);
 
 			i->Draw(shader);
 		}

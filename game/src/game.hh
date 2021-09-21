@@ -8,6 +8,8 @@
 #include "renderer/transform.hh"
 #include "input_control.hh"
 
+#include "physics/quickhull.hh"
+
 #define GLEW_EXPERIMENTAL GL_TRUE
 
 #define _DEBUG 1
