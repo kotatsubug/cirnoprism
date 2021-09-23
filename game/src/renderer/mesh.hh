@@ -59,7 +59,7 @@ public:
 	inline void SetPosition(const glm::vec3 val) { _position = val; }
 	inline void SetOrigin(const glm::vec3 val){ _origin = val; }
 	inline void SetRotation(const glm::vec3 val){ _rotation = val; }
-	inline void SetScale(const glm::vec3 val){_scale = val; }
+	inline void SetScale(const glm::vec3 val){ _scale = val; }
 
 	inline void Translate(const glm::vec3 val){ _position += val; }
 	inline void Rotate(const glm::vec3 val){ _rotation += val; }

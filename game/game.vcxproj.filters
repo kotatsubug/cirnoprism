@@ -45,6 +45,9 @@
     <ClCompile Include="src\physics\quickhull.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\skinned_mesh.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\libs.hh">
@@ -111,6 +114,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\physics\quickhull.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\math_linalg.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\skinned_mesh.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -146,50 +146,56 @@ void Game::_InitMaterials()
 
 void Game::_InitModels()
 {
-	std::vector<Mesh*> meshes;
-	std::vector<Mesh*> meshes2;
+//	std::vector<Mesh*> meshes;
+//	std::vector<Mesh*> meshes2;
 
-	std::vector<Vertex> matoshi = ImportOBJ("res/models/matoshi.obj");
-	meshes.push_back(new Mesh(
-		matoshi.data(), matoshi.size(),
-		NULL, 0,
-		glm::vec3(0.0f, -1.0f, -5.0f),
-		glm::vec3(0.0f),
-		glm::vec3(0.0f),
-		glm::vec3(1.0f)
-	));
+//	std::vector<Vertex> matoshi = ImportOBJ("res/models/matoshi.obj");
+//	meshes.push_back(new Mesh(
+//		matoshi.data(), matoshi.size(),
+//		NULL, 0,
+//		glm::vec3(0.0f, -1.0f, -5.0f),
+//		glm::vec3(0.0f),
+//		glm::vec3(0.0f),
+//		glm::vec3(1.0f)
+//	));
 
-	Primitive* quad = new Primitive();
+//	Primitive* quad = new Primitive();
 
-	Vertex planeVertices[] = {
-		// Position | Color | TexCoords | Normals
-		glm::vec3(-25.0f, 0.0f, -25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),
-		glm::vec3(-25.0f, 0.0f,  25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f,  0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
-		glm::vec3(25.0f, 0.0f,  25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f,  0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
-		
-		glm::vec3(25.0f, 0.0f, -25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),
-		glm::vec3(-25.0f, 0.0f, -25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),
-		glm::vec3(25.0f, 0.0f,  25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f,  0.0f), glm::vec3(0.0f, 0.0f, 1.0f)
-	};
+//	Vertex planeVertices[] = {
+//		// Position | Color | TexCoords | Normals
+//		glm::vec3(-25.0f, 0.0f, -25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+//		glm::vec3(-25.0f, 0.0f,  25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f,  0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+//		glm::vec3(25.0f, 0.0f,  25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f,  0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+//		
+//		glm::vec3(25.0f, 0.0f, -25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+//		glm::vec3(-25.0f, 0.0f, -25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+//		glm::vec3(25.0f, 0.0f,  25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f,  0.0f), glm::vec3(0.0f, 0.0f, 1.0f)
+//	};
 
-	quad->Set(planeVertices, (sizeof(planeVertices) / sizeof(Vertex)), 0, NULL);
+//	quad->Set(planeVertices, (sizeof(planeVertices) / sizeof(Vertex)), 0, NULL);
 
-	meshes2.push_back(new Mesh(
-		quad,
-		glm::vec3(0.0f, -1.0f, 0.0f),
-		glm::vec3(0.0f, -1.0f, 0.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(1.0f)
-	));
+//	meshes2.push_back(new Mesh(
+//		quad,
+//		glm::vec3(0.0f, -1.0f, 0.0f),
+//		glm::vec3(0.0f, -1.0f, 0.0f),
+//		glm::vec3(0.0f, 0.0f, 0.0f),
+//		glm::vec3(1.0f)
+//	));
 
-	delete quad;
+//	delete quad;
 
 	// Convex hull experimentation
-		QuickHull qh;
-		std::vector<glm::vec3> pointCloud = ImportOBJVertices("res/models/matoshi.obj");
-		ConvexHull hull = qh.GetConvexHull(pointCloud, false);
-		hull.WriteWaveformOBJ("res/models/convex_hull.obj");
-		/// Next step: make VertexDataSource return a vec3 array or something so you can feed it into Mesh constructor!!
+	//		QuickHull qh;
+	//		std::vector<glm::vec3> pointCloud = ImportOBJVertices("res/models/matoshi.obj");
+	//		ConvexHull hull = qh.GetConvexHull(pointCloud, false);
+	//		hull.WriteWaveformOBJ("res/models/convex_hull.obj");
+	//		/// Next step: make VertexDataSource return a vec3 array or something so you can feed it into Mesh constructor!!
+		
+		
+		kotlin.loadMesh("res/models/bob_lamp.md5mesh");
+		DEBUG_LOG("KOTLIN", LOG_WARN, "NUM BONES: %i", kotlin.numBones());
+
+
 
 	//	std::vector<Vertex> PCVB2;
 	//	for (size_t x = 0; x < PCVB.size(); x++)
@@ -216,30 +222,30 @@ void Game::_InitModels()
 
 
 
-	_models.push_back(new Model(
-		glm::vec3(0.0f),
-		_materials[0],
-		_textures[0],
-		_textures[1],
-		meshes
-	));
-
-	_models.push_back(new Model(
-		glm::vec3(0.0f),
-		_materials[0],
-		_textures[1],
-		_textures[1],
-		meshes2
-	));
-
-	for (auto*& i : meshes)
-	{
-		delete i;
-	}
-	for (auto*& i : meshes2)
-	{
-		delete i;
-	}
+//	_models.push_back(new Model(
+//		glm::vec3(0.0f),
+//		_materials[0],
+//		_textures[0],
+//		_textures[1],
+//		meshes
+//	));
+//
+//	_models.push_back(new Model(
+//		glm::vec3(0.0f),
+//		_materials[0],
+//		_textures[1],
+//		_textures[1],
+//		meshes2
+//	));
+//
+//	for (auto*& i : meshes)
+//	{
+//		delete i;
+//	}
+//	for (auto*& i : meshes2)
+//	{
+//		delete i;
+//	}
 }
 
 void Game::_InitPointLights()
@@ -816,6 +822,9 @@ void Game::Render()
 
 	for (auto& x : _models)
 		x->Draw(_shaders[SHADER_CORE_PROGRAM]); // Draw into core shader!
+
+	// REMOVE
+	kotlin.Draw(_shaders[SHADER_CORE_PROGRAM]);
 
 
 	_shaders[SHADER_CORE_PROGRAM]->UnUse();

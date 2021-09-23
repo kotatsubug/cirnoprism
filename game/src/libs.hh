@@ -22,6 +22,10 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 #include "renderer/vertex.hh"
 #include "renderer/primitives.hh"
 #include "renderer/mesh.hh"

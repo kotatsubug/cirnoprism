@@ -9,6 +9,7 @@
 #include "input_control.hh"
 
 #include "physics/quickhull.hh"
+#include "renderer/skinned_mesh.hh"
 
 #define GLEW_EXPERIMENTAL GL_TRUE
 
@@ -59,6 +60,8 @@ public:
 class Game
 {
 private:
+	SkinnedMesh kotlin;
+
 	// GLFW
 	GLFWwindow* _window;
 		const int _WINDOW_WIDTH, _WINDOW_HEIGHT;

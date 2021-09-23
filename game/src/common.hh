@@ -2,20 +2,28 @@
 
 #include <stdio.h>
 
+#define _________CIRNOPRISM_DEVELOPMENT_DEBUG
+
 #define LOG_FATAL "FATAL"
 #define LOG_ERROR "ERROR"
 #define LOG_WARN "WARN"
 #define LOG_SUCCESS "SUCCESS"
 
-#define DEBUG_LOG(category, level, message, ...) \
-	fprintf(stderr, "[%s] ", category); \
-	fprintf(stderr, "[%s] (%s:%d): ", level, __FILE__, __LINE__); \
-	fprintf(stderr, message, ##__VA_ARGS__); \
+#ifdef _________CIRNOPRISM_DEVELOPMENT_DEBUG
+#define DEBUG_LOG(category, level, message, ...)\
+	fprintf(stderr, "[%s] ", category);\
+	fprintf(stderr, "[%s] (%s:%d): ", level, __FILE__, __LINE__);\
+	fprintf(stderr, message, ##__VA_ARGS__);\
 	fprintf(stderr, "\n")
+#else
+#define DEBUG_LOG(category, level, message, ...)\
+	fprintf(stderr, "[%s] ", category);\
+	fprintf(stderr, "[%s] ", level);\
+	fprintf(stderr, message, ##__VA_ARGS__);\
+	fprintf(stderr, "\n")
+#endif
 
-#define DEBUG
-
-#ifdef DEBUG
+#ifdef _________CIRNOPRISM_DEVELOPMENT_DEBUG
 #define EXPECT(condition)\
 {\
 	do\
@@ -56,25 +64,25 @@ OpenAL_ErrorCheck(FUNCTION_CALL)
 
 
 #define PRINTF_BINARY_PATTERN_INT8 "%c%c%c%c%c%c%c%c"
-#define PRINTF_BYTE_TO_BINARY_INT8(i) \
-	(((i) & 0x80ll) ? '1' : '0'), \
-	(((i) & 0x40ll) ? '1' : '0'), \
-	(((i) & 0x20ll) ? '1' : '0'), \
-	(((i) & 0x10ll) ? '1' : '0'), \
-	(((i) & 0x08ll) ? '1' : '0'), \
-	(((i) & 0x04ll) ? '1' : '0'), \
-	(((i) & 0x02ll) ? '1' : '0'), \
+#define PRINTF_BYTE_TO_BINARY_INT8(i)\
+	(((i) & 0x80ll) ? '1' : '0'),\
+	(((i) & 0x40ll) ? '1' : '0'),\
+	(((i) & 0x20ll) ? '1' : '0'),\
+	(((i) & 0x10ll) ? '1' : '0'),\
+	(((i) & 0x08ll) ? '1' : '0'),\
+	(((i) & 0x04ll) ? '1' : '0'),\
+	(((i) & 0x02ll) ? '1' : '0'),\
 	(((i) & 0x01ll) ? '1' : '0')
 
-#define PRINTF_BINARY_PATTERN_INT16 \
+#define PRINTF_BINARY_PATTERN_INT16\
 	PRINTF_BINARY_PATTERN_INT8 PRINTF_BINARY_PATTERN_INT8
-#define PRINTF_BYTE_TO_BINARY_INT16(i) \
+#define PRINTF_BYTE_TO_BINARY_INT16(i)\
 	PRINTF_BYTE_TO_BINARY_INT8((i) >> 8), PRINTF_BYTE_TO_BINARY_INT8(i)
-#define PRINTF_BINARY_PATTERN_INT32 \
+#define PRINTF_BINARY_PATTERN_INT32\
 	PRINTF_BINARY_PATTERN_INT16 PRINTF_BINARY_PATTERN_INT16
-#define PRINTF_BYTE_TO_BINARY_INT32(i) \
+#define PRINTF_BYTE_TO_BINARY_INT32(i)\
 	PRINTF_BYTE_TO_BINARY_INT16((i) >> 16), PRINTF_BYTE_TO_BINARY_INT16(i)
-#define PRINTF_BINARY_PATTERN_INT64 \
+#define PRINTF_BINARY_PATTERN_INT64\
 	PRINTF_BINARY_PATTERN_INT32 PRINTF_BINARY_PATTERN_INT32
-#define PRINTF_BYTE_TO_BINARY_INT64(i) \
+#define PRINTF_BYTE_TO_BINARY_INT64(i)\
 	PRINTF_BYTE_TO_BINARY_INT32((i) >> 32), PRINTF_BYTE_TO_BINARY_INT32(i)

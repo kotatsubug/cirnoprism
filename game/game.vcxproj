@@ -88,14 +88,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\game\src;$(SolutionDir)\linking\openal\include;$(SolutionDir)\linking\soil2\include;$(SolutionDir)\linking\glm\include;$(SolutionDir)\linking\glfw\include;$(SolutionDir)\linking\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\game\src;$(SolutionDir)\linking\openal\include;$(SolutionDir)\linking\soil2\include;$(SolutionDir)\linking\glm\include;$(SolutionDir)\linking\glfw\include;$(SolutionDir)\linking\assimp\include;$(SolutionDir)\linking\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\linking\openal\lib\x86;$(SolutionDir)\linking\soil2\lib;$(SolutionDir)\linking\glfw\lib;$(SolutionDir)\linking\glew\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32.lib;soil2-debug.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\linking\openal\lib\x86;$(SolutionDir)\linking\soil2\lib;$(SolutionDir)\linking\glfw\lib;$(SolutionDir)\linking\glew\lib;$(SolutionDir)\linking\assimp\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32.lib;soil2-debug.lib;OpenAL32.lib;assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -155,12 +155,14 @@
     <ClCompile Include="src\game.cc" />
     <ClCompile Include="main.cc" />
     <ClCompile Include="src\renderer\mesh.cc" />
+    <ClCompile Include="src\renderer\skinned_mesh.cc" />
     <ClCompile Include="src\renderer\shader.cc" />
     <ClCompile Include="src\renderer\framebuffer.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common.hh" />
     <ClInclude Include="src\input_control.hh" />
+    <ClInclude Include="src\math\math_linalg.hh" />
     <ClInclude Include="src\physics\quickhull.hh" />
     <ClInclude Include="src\renderer\camera.hh" />
     <ClInclude Include="src\ecs\ecs.hh" />
@@ -175,6 +177,7 @@
     <ClInclude Include="src\renderer\mesh.hh" />
     <ClInclude Include="src\renderer\model.hh" />
     <ClInclude Include="src\objloader.hh" />
+    <ClInclude Include="src\renderer\skinned_mesh.hh" />
     <ClInclude Include="src\renderer\primitives.hh" />
     <ClInclude Include="src\renderer\shader.hh" />
     <ClInclude Include="src\renderer\texture.hh" />

@@ -44,4 +44,7 @@ public:
 	void SetVec4f(const glm::fvec4& val, const std::string& name);
 	void SetMat3fv(const glm::mat3& matrix, const std::string& name, GLboolean transpose = GL_FALSE);
 	void SetMat4fv(const glm::mat4& matrix, const std::string& name, GLboolean transpose = GL_FALSE);
+
+	/// This should only be used for debugging purposes.
+	inline GLuint GetID() { return _id; }
 };
