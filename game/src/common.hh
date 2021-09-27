@@ -4,6 +4,7 @@
 
 #define _________CIRNOPRISM_DEVELOPMENT_DEBUG
 
+#define LOG_INFO "INFO"
 #define LOG_FATAL "FATAL"
 #define LOG_ERROR "ERROR"
 #define LOG_WARN "WARN"

@@ -20,7 +20,6 @@ void Game::_InitWindow(const char* title, bool resizeable)
 	glfwWindowHint(GLFW_RESIZABLE, resizeable);
 	glfwWindowHint(GLFW_SAMPLES, 4); // MSAA
 #ifdef __APPLE__
-	// Downgrade OpenGL for itoddlers so it works for them
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
@@ -192,8 +191,14 @@ void Game::_InitModels()
 	//		/// Next step: make VertexDataSource return a vec3 array or something so you can feed it into Mesh constructor!!
 		
 		
-		kotlin.loadMesh("res/models/bob_lamp.md5mesh");
-		DEBUG_LOG("KOTLIN", LOG_WARN, "NUM BONES: %i", kotlin.numBones());
+
+
+	// Loading skinned meshes
+	//	kotlin.loadMesh("res/models/bob_lamp.md5mesh");
+	//	DEBUG_LOG("KOTLIN", LOG_WARN, "NUM BONES: %i", kotlin.numBones());
+
+
+
 
 
 
@@ -276,30 +281,34 @@ void Game::_InitUniforms()
 	
 }
 
-/*void Game::_InitECS()
+void Game::_InitECS()
 {
-
+	// ECS must be initialized in this order: first components, then entities, then systems
 	
 
-	// (1) Create components
-	TransformComponent transformComponent;
-	transformComponent.transform.SetPosition(glm::vec3(0.0f, 0.0f, 7.0f));
+	// Components
+	
+//	TransformComponent transformComponent;
+//	transformComponent.transform.SetPosition(glm::vec3(0.0f, 0.0f, 7.0f));
 
-	MovementControlComponent movementControl;
-	movementControl.movementControls.push_back(std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f) * 10.0f, &_ic_x));
-	movementControl.movementControls.push_back(std::make_pair(glm::vec3(0.0f, 0.0f, 1.0f) * 10.0f, &_ic_z));
-	// (2) Create entities
-	_entity = _ecs.MakeEntity(transformComponent, movementControl);
+//	MovementControlComponent movementControl;
+//	movementControl.movementControls.push_back(std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f) * 10.0f, &_ic_x));
+//	movementControl.movementControls.push_back(std::make_pair(glm::vec3(0.0f, 0.0f, 1.0f) * 10.0f, &_ic_z));
 
-	// (3) Create systems
-	MovementControlSystem movementControlSystem;
-	_ecsMainSystems.AddSystem(movementControlSystem);
+	// Entities
+	
+//	_entity = _ecs.MakeEntity(transformComponent, movementControl);
 
-//	RenderableMeshSystem renderableMeshSystem(gameRenderContext);
-//	_ecsRenderingPipeline.AddSystem(renderableMeshSystem);
+	// Systems
+	
+//	MovementControlSystem movementControlSystem;
+//	_ecsMainSystems.AddSystem(movementControlSystem);
+
+	//	RenderableMeshSystem renderableMeshSystem(gameRenderContext);
+	//	_ecsRenderingPipeline.AddSystem(renderableMeshSystem);
 
 }
-
+/*
 /// Updates VP matrices as rendered from Camera and sends their data to SHADER_CORE.
 /// Call Shader::Use() on SHADER_CORE first.
 void Game::_UpdateCameraUniforms()
@@ -512,13 +521,88 @@ void Game::_InitSoundSystem()
 
 	// Create buffers that hold the sound data
 	// These are shared between contexts and are defined at device level
-	
 
+	struct ReadWavData
+	{
+		uint32_t channels = 0;
+		uint32_t sampleRate = 0;
+		drwav_uint64 totalPCMFrameCount = 0;
+		std::vector<uint16_t> pcmData;
 
-	// TODO: Create WAV
+		inline constexpr drwav_uint64 GetTotalSamples()
+		{
+			return totalPCMFrameCount * channels;
+		}
+	};
 
-	
+	ReadWavData monoData;
 
+	{
+		drwav_int16* pSampleData = drwav_open_file_and_read_pcm_frames_s16(
+			"res/sounds/music/the_other_side.wav",
+			&monoData.channels,
+			&monoData.sampleRate,
+			&monoData.totalPCMFrameCount,
+			nullptr
+		);
+
+		if (pSampleData == NULL)
+		{
+			DEBUG_LOG("SoundSystem", LOG_ERROR, "Failed to load audio file!");
+		}
+
+		if (monoData.GetTotalSamples() > drwav_uint64(std::numeric_limits<size_t>::max()))
+		{
+			DEBUG_LOG("SoundSystem", LOG_ERROR, "Too much data in file for 32-bit addressed vector");
+			drwav_free(pSampleData, nullptr);
+
+			return; // TODO
+		}
+
+		monoData.pcmData.resize(size_t(monoData.GetTotalSamples()));
+
+		// Copy the sample data into the vector data
+		// memcpy works on bytes so multiply size by 2 (two bytes in short16 format)
+		std::memcpy(monoData.pcmData.data(), pSampleData, monoData.pcmData.size() * 2);
+		
+		drwav_free(pSampleData, nullptr);
+	}
+
+	ALuint monoSoundBuffer;
+	alec(alGenBuffers(1, &monoSoundBuffer));
+	alec(alBufferData(
+		monoSoundBuffer,
+		monoData.channels > 1 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16,
+		monoData.pcmData.data(),
+		monoData.pcmData.size() * 2, // Two bytes per sample!
+		monoData.sampleRate
+	));
+
+	// Create a sound source that plays the wav from the sound buffer
+	ALuint monoSource;
+	alec(alGenSources(1, &monoSource));
+	alec(alSource3f(monoSource, AL_POSITION, 0.0f, 0.0f, 0.0f));
+	alec(alSource3f(monoSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f));
+	alec(alSourcef(monoSource, AL_PITCH, 1.0f));
+	alec(alSourcef(monoSource, AL_GAIN, 1.0f));
+	alec(alSourcei(monoSource, AL_LOOPING, AL_FALSE));
+	alec(alSourcei(monoSource, AL_BUFFER, monoSoundBuffer));
+
+	// Play the sound!
+	alec(alSourcePlay(monoSource));
+	ALint sourceState;
+	alec(alGetSourcei(monoSource, AL_SOURCE_STATE, &sourceState));
+	while (sourceState == AL_PLAYING)
+	{
+		// Basically loop until we're doing playing the monoSource
+		alec(alGetSourcei(monoSource, AL_SOURCE_STATE, &sourceState));
+	}
+
+	// OpenAL cleanup
+	alec(alDeleteSources(1, &monoSource));
+	alDeleteSources(1, &monoSoundBuffer);
+	alcMakeContextCurrent(nullptr);
+	alec(alcCloseDevice(device));
 
 
 
@@ -586,7 +670,7 @@ Game::Game(
 	_InitLights(); // Init lights first, THEN send to uniforms!
 	_InitUniforms(); // This activates shaders and sends values to core, should be called near the end
 
-//	_InitECS();
+	_InitECS();
 
 	_InitSoundSystem();
 

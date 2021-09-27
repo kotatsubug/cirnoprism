@@ -4,11 +4,6 @@
 #include "ecs_system.hh"
 
 #include <map>
-#include <iostream> // TODO: REMOVE
-
-#define NULL_COPY_AND_ASSIGN(T) \
-	T(const T& other) {(void)other;} \
-	void operator=(const T& other) { (void)other; }
 
 class ECSListener
 {
@@ -98,8 +93,6 @@ private:
 		std::vector<BaseECSComponent*>& componentParam, std::vector<std::vector<uint8_t>*>& componentArrays);
 
 	uint32_t _FindLeastCommonComponent(const std::vector<uint32_t>& componentTypes, const std::vector<uint32_t>& componentFlags);
-
-	NULL_COPY_AND_ASSIGN(ECS);
 public:
 	ECS() {}
 	~ECS();
@@ -110,11 +103,14 @@ public:
 	}
 
 	// Entity methods
+
+	/// Create and return a new entity. This is a more thorough constructor and should generally be
+	/// called only internally, but is OK to use if you know what you're doing.
 	EntityHandle MakeEntity(BaseECSComponent** components, const uint32_t* componentIDs, size_t numComponents);
 
 	void RemoveEntity(EntityHandle handle);
 
-// Template methods for entity constructors
+	/// Create and return a new entity.
 	template<class ...COMPONENT_CLASSES>
 	EntityHandle MakeEntity(COMPONENT_CLASSES&... args)
 	{
@@ -123,88 +119,8 @@ public:
 		return MakeEntity(components, componentIDs, sizeof...(COMPONENT_CLASSES));
 	}
 
-/*	template<class A>
-	EntityHandle MakeEntity(A& c1)
-	{
-		BaseECSComponent* components[] = { &c1 };
-		uint32_t componentIDs[] = {A::ID};
-		return MakeEntity(components, componentIDs, 1);
-	}
-
-	template<class A, class B>
-	EntityHandle MakeEntity(A& c1, B& c2)
-	{
-		BaseECSComponent* components[] = { &c1, &c2 };
-		uint32_t componentIDs[] = {A::ID, B::ID};
-		return makeEntity(components, componentIDs, 2);
-	}
-
-	template<class A, class B, class C>
-	EntityHandle MakeEntity(A& c1, B& c2, C& c3)
-	{
-		BaseECSComponent* components[] = { &c1, &c2, &c3 };
-		uint32_t componentIDs[] = {A::ID, B::ID, C::ID};
-		return MakeEntity(components, componentIDs, 3);
-	}
-
-	template<class A, class B, class C, class D>
-	EntityHandle MakeEntity(A& c1, B& c2, C& c3, D& c4)
-	{
-		BaseECSComponent* components[] = { &c1, &c2, &c3, &c4 };
-		uint32_t componentIDs[] = {A::ID, B::ID, C::ID, D::ID};
-		return MakeEntity(components, componentIDs, 4);
-	}
-
-	template<class A, class B, class C, class D, class E>
-	EntityHandle MakeEntity(A& c1, B& c2, C& c3, D& c4, E& c5)
-	{
-		BaseECSComponent* components[] = { &c1, &c2, &c3, &c4, &c5 };
-		uint32_t componentIDs[] = {A::ID, B::ID, C::ID, D::ID, E::ID};
-		return MakeEntity(components, componentIDs, 5);
-	}
-
-	template<class A, class B, class C, class D, class E, class F>
-	EntityHandle MakeEntity(A& c1, B& c2, C& c3, D& c4, E& c5, F& c6)
-	{
-		BaseECSComponent* components[] = { &c1, &c2, &c3, &c4, &c5, &c6};
-		uint32_t componentIDs[] = {A::ID, B::ID, C::ID, D::ID, E::ID, F::ID};
-		return MakeEntity(components, componentIDs, 6);
-	}
-
-	template<class A, class B, class C, class D, class E, class F, class G>
-	EntityHandle MakeEntity(A& c1, B& c2, C& c3, D& c4, E& c5, F& c6, G& c7)
-	{
-		BaseECSComponent* components[] = { &c1, &c2, &c3, &c4, &c5, &c6, &c7};
-		uint32_t componentIDs[] = {A::ID, B::ID, C::ID, D::ID, E::ID, F::ID, G::ID};
-		return MakeEntity(components, componentIDs, 7);
-	}
-
-	template<class A, class B, class C, class D, class E, class F, class G, class H>
-	EntityHandle MakeEntity(A& c1, B& c2, C& c3, D& c4, E& c5, F& c6, G& c7, H& c8)
-	{
-		BaseECSComponent* components[] = { &c1, &c2, &c3, &c4, &c5, &c6, &c7, &c8};
-		uint32_t componentIDs[] = {A::ID, B::ID, C::ID, D::ID, E::ID, F::ID, G::ID, H::ID};
-		return MakeEntity(components, componentIDs, 8);
-	}
-
-	template<class A, class B, class C, class D, class E, class F, class G, class H, class I>
-	EntityHandle MakeEntity(A& c1, B& c2, C& c3, D& c4, E& c5, F& c6, G& c7, H& c8, I& c9)
-	{
-		BaseECSComponent* components[] = { &c1, &c2, &c3, &c4, &c5, &c6, &c7, &c8, &c9 };
-		uint32_t componentIDs[] = {A::ID, B::ID, C::ID, D::ID, E::ID, F::ID, G::ID, H::ID, I::ID};
-		return MakeEntity(components, componentIDs, 9);
-	}
-
-	template<class A, class B, class C, class D, class E, class F, class G, class H, class I, class J>
-	EntityHandle MakeEntity(A& c1, B& c2, C& c3, D& c4, E& c5, F& c6, G& c7, H& c8, I& c9, J& c10)
-	{
-		BaseECSComponent* components[] = { &c1, &c2, &c3, &c4, &c5, &c6, &c7, &c8, &c9, &c10 };
-		uint32_t componentIDs[] = {A::ID, B::ID, C::ID, D::ID, E::ID, F::ID, G::ID, H::ID, I::ID, J::ID };
-		return MakeEntity(components, componentIDs, 10);
-	}*/
-// End template methods for entity constructors
-
 	// Component methods
+
 	template<class Component>
 	inline void AddComponent(EntityHandle entity, Component* component)
 	{

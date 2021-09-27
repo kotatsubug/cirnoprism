@@ -30,7 +30,6 @@ struct MovementControlComponent : public ECSComponent<MovementControlComponent>
 	std::vector<std::pair<glm::vec3, InputControl*>> movementControls;
 };
 
-
 class MovementControlSystem : public BaseECSSystem
 {
 private:
@@ -44,8 +43,8 @@ public:
 
 	virtual void UpdateComponents(float delta, BaseECSComponent** components)
 	{
-		TransformComponent* transform = (TransformComponent*) components[0];
-		MovementControlComponent* movementControl = (MovementControlComponent*) components[1];
+		TransformComponent* transform = (TransformComponent*)components[0];
+		MovementControlComponent* movementControl = (MovementControlComponent*)components[1];
 
 		for (uint32_t i = 0; i < movementControl->movementControls.size(); i++)
 		{
@@ -56,6 +55,68 @@ public:
 		}
 	}
 };
+
+enum SOUND_EVENT
+{
+	ZERO,
+	ONLY_PLAY_ON_FUNCTION_CALL,
+	UI_CLICK,
+	PLAYER_WALKS,
+	PLAYER_SPRINTS,
+	PLAYER_JUMPS,
+};
+
+// How to get res dir?
+// Should I associate one with each SOUND_EVENT enum? <-- Actually no. Sound events are only for detecting WHEN sounds should play.
+//															Now that I think about it, perhaps have two enums. One for sound EVENTS (WHEN) and one for sound TYPES (WHAT)
+//															Then the sound TYPES can have an association!!
+//		so like std::string resDir = "res/sounds/" + SoundRegistry::GetFilePath(SOUND_TYPE);
+//		and then a function somewhere else 
+
+struct SoundComponent : public ECSComponent<SoundComponent>
+{
+	uint16_t soundEvent; // WHEN the sound should play
+	uint16_t soundType; // WHAT sound to play
+	std::string resourcePath; // directory of soundType -- determined by functions on initialization of component?
+	// todo changesound functions, playsound, etc
+};
+
+class SoundEventSystem : public BaseECSSystem
+{
+private:
+public:
+	SoundEventSystem() : BaseECSSystem()
+	{
+		AddComponentType(SoundComponent::ID);
+	}
+
+	virtual void UpdateComponents(float delta, BaseECSComponent** components)
+	{
+		SoundComponent* sound = (SoundComponent*)components[0];
+
+		switch (sound->soundEvent)
+		{
+			case SOUND_EVENT::ZERO:
+				break;
+		//	case SOUND_EVENT::UI_BUTTON_0:
+				break;
+		//	case SOUND_EVENT::UI_BUTTON_1:
+				break;
+		}
+
+	}
+
+	virtual void PlaySound(BaseECSComponent** components)
+	{
+
+	}
+};
+
+
+
+
+
+
 
 class Game
 {
@@ -140,7 +201,7 @@ private:
 	void _InitLights();
 	void _InitUniforms();
 	
-//	void _InitECS();
+	void _InitECS();
 
 
 	void _UpdateUniforms();

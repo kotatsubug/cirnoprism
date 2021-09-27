@@ -13,7 +13,8 @@ ECS::~ECS()
 		}
 	}
 
-	for(uint32_t i = 0; i < _entities.size(); i++) {
+	for(uint32_t i = 0; i < _entities.size(); i++)
+	{
 		delete _entities[i];
 	}
 }
@@ -50,7 +51,8 @@ EntityHandle ECS::MakeEntity(BaseECSComponent** entityComponents, const uint32_t
 		}
 		else
 		{
-			for (uint32_t j = 0; j < _listeners[i]->GetComponentIDs().size(); j++) {
+			for (uint32_t j = 0; j < _listeners[i]->GetComponentIDs().size(); j++)
+			{
 				bool hasComponent = false;
 
 				for (uint32_t k = 0; k < numComponents; k++)
@@ -68,7 +70,8 @@ EntityHandle ECS::MakeEntity(BaseECSComponent** entityComponents, const uint32_t
 				}
 			}
 
-			if(isValid) {
+			if (isValid)
+			{
 				_listeners[i]->OnMakeEntity(handle);
 			}
 		}
@@ -81,7 +84,8 @@ void ECS::RemoveEntity(EntityHandle handle)
 {
 	std::vector<std::pair<uint32_t, uint32_t> >& entity = _HandleToEntity(handle);
 
-	for(uint32_t i = 0; i < _listeners.size(); i++) {
+	for (uint32_t i = 0; i < _listeners.size(); i++)
+	{
 		const std::vector<uint32_t>& componentIDs = _listeners[i]->GetComponentIDs();
 		bool isValid = true;
 
@@ -104,20 +108,22 @@ void ECS::RemoveEntity(EntityHandle handle)
 					}
 				}
 
-				if(!hasComponent)
+				if (!hasComponent)
 				{
 					isValid = false;
 					break;
 				}
 			}
 
-			if(isValid) {
+			if (isValid)
+			{
 				_listeners[i]->OnRemoveEntity(handle);
 			}
 		}
 	}
 	
-	for(uint32_t i = 0; i < entity.size(); i++) {
+	for (uint32_t i = 0; i < entity.size(); i++)
+	{
 		_DeleteComponent(entity[i].first, entity[i].second);
 	}
 
@@ -149,7 +155,8 @@ void ECS::_DeleteComponent(uint32_t componentID, uint32_t index)
 	BaseECSComponent* srcComponent = (BaseECSComponent*)&arr[srcIndex];
 	freefn(destComponent);
 
-	if(index == srcIndex) {
+	if (index == srcIndex)
+	{
 		arr.resize(srcIndex);
 		return;
 	}
@@ -160,7 +167,8 @@ void ECS::_DeleteComponent(uint32_t componentID, uint32_t index)
 
 	for (uint32_t i = 0; i < srcComponents.size(); i++)
 	{
-		if (componentID == srcComponents[i].first && srcIndex == srcComponents[i].second) {
+		if (componentID == srcComponents[i].first && srcIndex == srcComponents[i].second)
+		{
 			srcComponents[i].second = index;
 			break;
 		}

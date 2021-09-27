@@ -8,6 +8,8 @@ private:
 	std::vector<uint32_t> _componentTypes;
 	std::vector<uint32_t> _componentFlags;
 protected:
+	/// Component type is the ID of the component.
+	/// Set flag = 1 if the component is OPTIONAL.
 	void AddComponentType(uint32_t componentType, uint32_t componentFlag = 0)
 	{
 		_componentTypes.push_back(componentType);

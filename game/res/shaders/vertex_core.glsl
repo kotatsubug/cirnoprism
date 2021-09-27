@@ -7,7 +7,7 @@ layout (location = 3) in vec3 vertex_normal;
 layout (location = 4) in ivec4 vertex_bone_ids;
 layout (location = 5) in vec4 vertex_bone_weights;
 
-const int MAX_BONES = 255;
+const int MAX_BONES = 100;
 
 out vec3 vs_position;
 out vec3 vs_color;
