@@ -111,9 +111,9 @@ void Game::_InitShaders()
 		new Shader(
 			_GL_VERSION_MAJOR,
 			_GL_VERSION_MINOR,
-			"res/shaders/debug/normals.vert",
-			"res/shaders/debug/normals.frag",
-			"res/shaders/debug/normals.geom"
+			"res/shaders/misc/normals.vert",
+			"res/shaders/misc/normals.frag",
+			"res/shaders/misc/normals.geom"
 	));
 }
 
