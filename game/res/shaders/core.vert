@@ -8,6 +8,7 @@ layout (location = 4) in ivec4 vertex_bone_ids;
 layout (location = 5) in vec4 vertex_bone_weights;
 
 const int MAX_BONES = 100;
+const int MAX_WEIGHTS = 4;
 
 out vec3 vs_position;
 out vec3 vs_color;
@@ -22,7 +23,7 @@ uniform mat4 projectionMatrix;
 
 uniform mat4 lightProjection;
 
-uniform mat4 gBones[MAX_BONES];
+uniform mat4 boneTransforms[MAX_BONES];
 
 void main()
 {
@@ -35,12 +36,13 @@ void main()
 
 	fragPosLight = lightProjection * vec4(vertex_position, 1.0);
 
-	mat4 BoneTransform = gBones[vertex_bone_ids[0]] * vertex_bone_weights[0];
-    BoneTransform += gBones[vertex_bone_ids[1]] * vertex_bone_weights[1];
-    BoneTransform += gBones[vertex_bone_ids[2]] * vertex_bone_weights[2];
-    BoneTransform += gBones[vertex_bone_ids[3]] * vertex_bone_weights[3];
-	vec4 posl = BoneTransform * vec4(vertex_position, 1.0);
 
-	gl_Position = projectionMatrix * viewMatrix * modelMatrix * posl;
-//	gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(vertex_position, 1.0);
+		mat4 finalBoneTransform = boneTransforms[vertex_bone_ids.x] * vertex_bone_weights.x;
+		finalBoneTransform += boneTransforms[vertex_bone_ids.y] * vertex_bone_weights.y;
+		finalBoneTransform += boneTransforms[vertex_bone_ids.z] * vertex_bone_weights.z;
+		finalBoneTransform += boneTransforms[vertex_bone_ids.w] * vertex_bone_weights.w;
+		vec4 posl = finalBoneTransform * vec4(vertex_position, 1.0);
+
+	//	gl_Position = projectionMatrix * viewMatrix * modelMatrix * posl;
+		gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(vertex_position, 1.0);
 }

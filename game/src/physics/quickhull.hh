@@ -11,7 +11,6 @@
 #include <glm.hpp>
 
 #include "common.hh"
-#include "math.hh"
 #include "renderer/mesh.hh"
 
 struct DiagnosticData
@@ -91,7 +90,7 @@ public:
 
 	struct Face {
 		size_t _he;
-		Plane _P;
+		qt::Plane _P;
 		float _mostDistantPointDist;
 		size_t _mostDistantPoint;
 		size_t _visibilityCheckedOnIteration;
@@ -677,7 +676,7 @@ private:
 	// side of them especially at the the end of the iteration. When a face is removed from the mesh, its associated point vector, if such
 	// exists, is moved to the index vector pool, and when we need to add new faces with points on the positive side to the mesh,
 	// we reuse these vectors. This reduces the amount of std::vectors we have to deal with, and impact on performance is remarkable.
-	Pool<std::vector<size_t>> _indexVectorPool;
+	qt::Pool<std::vector<size_t>> _indexVectorPool;
 	inline std::unique_ptr<std::vector<size_t>> _GetIndexVectorFromPool();
 	inline void _ReclaimToIndexVectorPool(std::unique_ptr<std::vector<size_t>>& ptr);
 
@@ -739,7 +738,7 @@ inline void QuickHull::_ReclaimToIndexVectorPool(std::unique_ptr<std::vector<siz
 
 inline bool QuickHull::_AddPointToFace(typename MeshBuilder::Face& f, size_t pointIndex)
 {
-	const float D = Math::DistanceToPlaneSigned(_vertexData[pointIndex], f._P);
+	const float D = qt::DistanceToPlaneSigned(_vertexData[pointIndex], f._P);
 
 	if (D > 0 && D * D > _epsilonSquared * f._P._NLength2)
 	{

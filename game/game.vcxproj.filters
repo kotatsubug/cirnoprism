@@ -74,13 +74,13 @@
     <ClInclude Include="src\renderer\camera.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\math.hh">
+    <ClInclude Include="src\math\math_etc.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\model.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\objloader.hh">
+    <ClInclude Include="src\util\obj_importer.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\light.hh">
@@ -122,17 +122,35 @@
     <ClInclude Include="src\renderer\skinned_mesh.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\math\math_datastruc.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\math_quat.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\skeletal_animation.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\md5_importer.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\math_bit.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glew32.dll" />
     <None Include="glfw3.dll" />
-    <None Include="res\shaders\fragment_core.glsl" />
-    <None Include="res\shaders\vertex_core.glsl" />
+    <None Include="res\shaders\core.frag" />
+    <None Include="res\shaders\core.vert" />
     <None Include="res\shaders\shadow.vert" />
     <None Include="res\shaders\shadow.frag" />
     <None Include="res\shaders\framebuffer.vert" />
     <None Include="res\shaders\framebuffer.frag" />
     <None Include="OpenAL32.dll" />
+    <None Include="res\shaders\debug\normals.vert" />
+    <None Include="res\shaders\debug\normals.geom" />
+    <None Include="res\shaders\debug\normals.frag" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">

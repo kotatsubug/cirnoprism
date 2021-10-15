@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include <glew.h> // Must be BEFORE GLFW!
 #include <glfw3.h>
@@ -44,6 +45,7 @@ public:
 	void SetVec4f(const glm::fvec4& val, const std::string& name);
 	void SetMat3fv(const glm::mat3& matrix, const std::string& name, GLboolean transpose = GL_FALSE);
 	void SetMat4fv(const glm::mat4& matrix, const std::string& name, GLboolean transpose = GL_FALSE);
+	void SetArrMat4fv(const std::vector<glm::mat4>& matrices, const std::string& name, GLboolean transpose = GL_FALSE);
 
 	/// This should only be used for debugging purposes.
 	inline GLuint GetID() { return _id; }

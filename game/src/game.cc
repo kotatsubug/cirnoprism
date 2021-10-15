@@ -60,8 +60,8 @@ void Game::_InitGLFlags()
 	glDepthFunc(GL_LESS);
 
 	glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
-	glCullFace(GL_FRONT); // TODO: Only do frontface culling when calculating lighting pass in deferred shading model
+	glCullFace(GL_BACK);
+//	glCullFace(GL_FRONT); // TODO: Only do frontface culling when calculating lighting pass in deferred shading model
 	glFrontFace(GL_CW);
 	//glFrontFace(GL_CCW);
 
@@ -96,20 +96,28 @@ void Game::_InitShaders()
 	_shaders.push_back(new Shader(
 		_GL_VERSION_MAJOR,
 		_GL_VERSION_MINOR,
-		"res/shaders/vertex_core.glsl",
-		"res/shaders/fragment_core.glsl"
+		"res/shaders/core.vert",
+		"res/shaders/core.frag"
 	));
 
-	_shaders.push_back(new Shader(_GL_VERSION_MAJOR, _GL_VERSION_MINOR, "res/shaders/shadow.vert", "res/shaders/shadow.frag"));
+	_shaders.push_back(new Shader(
+		_GL_VERSION_MAJOR,
+		_GL_VERSION_MINOR,
+		"res/shaders/shadow.vert",
+		"res/shaders/shadow.frag"
+	));
 
-//	_shaders.push_back(new Shader(
-//		_GL_VERSION_MAJOR,
-//		_GL_VERSION_MINOR,
-//		"shaders/vertex_shadow.glsl",
-//		"shaders/fragment_shadow.glsl"
-//	));
+	_shaders.push_back(
+		new Shader(
+			_GL_VERSION_MAJOR,
+			_GL_VERSION_MINOR,
+			"res/shaders/debug/normals.vert",
+			"res/shaders/debug/normals.frag",
+			"res/shaders/debug/normals.geom"
+	));
 }
 
+/// NOTE: Initialize shaders first.
 void Game::_InitFramebuffers()
 {
 /*	FramebufferType type;
@@ -127,7 +135,7 @@ void Game::_InitFramebuffers()
 
 void Game::_InitTextures()
 {
-	_textures.push_back(new Texture("res/textures/models/matoshi.png", GL_TEXTURE_2D));
+	_textures.push_back(new Texture("res/textures/models/mouse.jpg", GL_TEXTURE_2D));
 	_textures.push_back(new Texture("res/textures/models/matoshi_emissive.png", GL_TEXTURE_2D));
 }
 
@@ -145,43 +153,50 @@ void Game::_InitMaterials()
 
 void Game::_InitModels()
 {
-//	std::vector<Mesh*> meshes;
-//	std::vector<Mesh*> meshes2;
+	std::vector<Mesh*> meshes;
+	std::vector<Mesh*> meshes2;
+	
+	meshes.push_back(new Mesh(
+		"res/models/mouse.obj",
+		0x0000,
+		glm::vec3(0.0f, 5.0f, -1.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f),
+		glm::vec3(0.25f)
+	));
 
-//	std::vector<Vertex> matoshi = ImportOBJ("res/models/matoshi.obj");
-//	meshes.push_back(new Mesh(
-//		matoshi.data(), matoshi.size(),
-//		NULL, 0,
-//		glm::vec3(0.0f, -1.0f, -5.0f),
-//		glm::vec3(0.0f),
-//		glm::vec3(0.0f),
-//		glm::vec3(1.0f)
-//	));
+	meshes.push_back(new Mesh(
+		"res/models/low_effort_test_man.md5mesh",
+		0x0001,
+		glm::vec3(-10.0f, 0.0f, 0.0f),
+		glm::vec3(-10.0f, 0.0f, 0.0f),
+		glm::vec3(-90.0f, 0.0f, 0.0f),
+		glm::vec3(3.0f)
+	));
 
-//	Primitive* quad = new Primitive();
+	Primitive* quad = new Primitive();
 
-//	Vertex planeVertices[] = {
-//		// Position | Color | TexCoords | Normals
-//		glm::vec3(-25.0f, 0.0f, -25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),
-//		glm::vec3(-25.0f, 0.0f,  25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f,  0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
-//		glm::vec3(25.0f, 0.0f,  25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f,  0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
-//		
-//		glm::vec3(25.0f, 0.0f, -25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),
-//		glm::vec3(-25.0f, 0.0f, -25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),
-//		glm::vec3(25.0f, 0.0f,  25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f,  0.0f), glm::vec3(0.0f, 0.0f, 1.0f)
-//	};
+	PerVertexData planeVertices[] = {
+		glm::vec3(-25.0f, 0.0f, -25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),  glm::ivec4(0), glm::vec4(0.0f), 
+		glm::vec3(-25.0f, 0.0f,  25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f,  0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::ivec4(0), glm::vec4(0.0f),
+		glm::vec3(25.0f, 0.0f,  25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f,  0.0f), glm::vec3(0.0f, 0.0f, 1.0f),  glm::ivec4(0), glm::vec4(0.0f),
+		
+		glm::vec3(25.0f, 0.0f, -25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),   glm::ivec4(0), glm::vec4(0.0f),
+		glm::vec3(-25.0f, 0.0f, -25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),  glm::ivec4(0), glm::vec4(0.0f),
+		glm::vec3(25.0f, 0.0f,  25.0f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f,  0.0f), glm::vec3(0.0f, 0.0f, 1.0f),  glm::ivec4(0), glm::vec4(0.0f)
+	};
 
-//	quad->Set(planeVertices, (sizeof(planeVertices) / sizeof(Vertex)), 0, NULL);
+	quad->Set(planeVertices, (sizeof(planeVertices) / sizeof(PerVertexData)), 0, NULL);
 
-//	meshes2.push_back(new Mesh(
-//		quad,
-//		glm::vec3(0.0f, -1.0f, 0.0f),
-//		glm::vec3(0.0f, -1.0f, 0.0f),
-//		glm::vec3(0.0f, 0.0f, 0.0f),
-//		glm::vec3(1.0f)
-//	));
+	meshes2.push_back(new Mesh(
+		quad,
+		glm::vec3(0.0f, -1.0f, 0.0f),
+		glm::vec3(0.0f, -1.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f)
+	));
 
-//	delete quad;
+	delete quad;
 
 	// Convex hull experimentation
 	//		QuickHull qh;
@@ -193,9 +208,41 @@ void Game::_InitModels()
 		
 
 
-	// Loading skinned meshes
-	//	kotlin.loadMesh("res/models/bob_lamp.md5mesh");
-	//	DEBUG_LOG("KOTLIN", LOG_WARN, "NUM BONES: %i", kotlin.numBones());
+//	Mesh* meshy = new Mesh(
+//		"res/models/low_effort_test_man.md5mesh",
+//		0x0001,
+//		glm::vec3(0.0f, 0.0f, 0.0f),
+//		glm::vec3(0.0f, 0.0f, 0.0f),
+//		glm::vec3(-90.0f, 0.0f, 0.0f)
+//	);
+//	std::vector<Mesh*> meshylist;
+//	meshylist.push_back(meshy);
+//	_models.push_back(new Model(
+//		glm::vec3(0.0f, 0.0f, 15.0f),
+//		_materials[0],
+//		_textures[0],
+//		_textures[1],
+//		meshylist
+//	));
+//	delete meshy;
+	
+
+
+	// TODO: Calculate normals on the fly using a geometry shader
+//	Mesh* mouse = new Mesh(
+//		"res/models/matoshi.obj",
+//		0x0000
+//	);
+//	std::vector<Mesh*> meshlist0;
+//	_models.push_back(new Model(
+//		glm::vec3(0.0f, 0.0f, -1.0f),
+//		_materials[0],
+//		_textures[0],
+//		_textures[1],
+//		meshlist0
+//	));
+//	delete mouse;
+	
 
 
 
@@ -227,30 +274,30 @@ void Game::_InitModels()
 
 
 
-//	_models.push_back(new Model(
-//		glm::vec3(0.0f),
-//		_materials[0],
-//		_textures[0],
-//		_textures[1],
-//		meshes
-//	));
-//
-//	_models.push_back(new Model(
-//		glm::vec3(0.0f),
-//		_materials[0],
-//		_textures[1],
-//		_textures[1],
-//		meshes2
-//	));
-//
-//	for (auto*& i : meshes)
-//	{
-//		delete i;
-//	}
-//	for (auto*& i : meshes2)
-//	{
-//		delete i;
-//	}
+	_models.push_back(new Model(
+		glm::vec3(0.0f),
+		_materials[0],
+		_textures[0],
+		_textures[1],
+		meshes
+	));
+
+	_models.push_back(new Model(
+		glm::vec3(0.0f),
+		_materials[0],
+		_textures[1],
+		_textures[1],
+		meshes2
+	));
+
+	for (auto*& i : meshes)
+	{
+		delete i;
+	}
+	for (auto*& i : meshes2)
+	{
+		delete i;
+	}
 }
 
 void Game::_InitPointLights()
@@ -349,38 +396,35 @@ void Game::_UpdateCameraUniforms()
 	
 }*/
 
-/// Updates VP matrices as rendered from Camera and sends their data to SHADER_CORE.
+/// Updates VP matrices as rendered from Camera and sends their data to a shader.
 /// Call Shader::Use() first.
-void Game::_UpdateUniforms()
+void Game::_UpdateUniforms(Shader* shader)
 {
 	// Update view matrix
 	_viewMatrix = _camera.GetViewMatrix();
-// 	_viewMatrix = _workingTransform
-	_shaders[SHADER_CORE_PROGRAM]->SetMat4fv(_viewMatrix, "viewMatrix"); // Send
-	_shaders[SHADER_CORE_PROGRAM]->SetVec3f(_camera.GetPosition(), "camPosition"); // Send cam pos to shader files (for specular light)
-	
+	shader->SetMat4fv(_viewMatrix, "viewMatrix"); // Send
+	shader->SetVec3f(_camera.GetPosition(), "camPosition"); // Send cam pos to shader files (for specular light)
 
 	// TODO: THIS IS REALTIME LIGHTING LOCATION UPDATING.
 	// In the future, only send this information if a light pos has been updated
 	for (auto* pl : _pointLights)
 	{
-		pl->SendToShader(*(_shaders[SHADER_CORE_PROGRAM]));
+		pl->SendToShader(*shader);
 	}
 
 	// Update framebuffer...
 	glfwGetFramebufferSize(_window, &_framebufferWidth, &_framebufferHeight);
 
 	// ...THEN update perspective matrix!
-	_projectionMatrix = glm::mat4(1.0f); // Reset
-	_projectionMatrix = glm::perspective( /// This keeps fucking crashing when I minimize the window
+	_projectionMatrix = glm::mat4(1.0f);
+	_projectionMatrix = glm::perspective( // FIXME: Crash on windows minimization
 		glm::radians(_fov),
 		static_cast<float>(_framebufferWidth) / _framebufferHeight,
 		_nearPlane,
 		_farPlane
 	);
-	_shaders[SHADER_CORE_PROGRAM]->SetMat4fv(_projectionMatrix, "projectionMatrix"); // Send
 
-	
+	shader->SetMat4fv(_projectionMatrix, "projectionMatrix");
 }
 
 void Game::_UpdateDeltaTime()
@@ -467,6 +511,13 @@ void Game::_UpdateInputKeyboard()
 	{
 		_camera.SetMovementSpeed(_camera.GetMovementSpeed() - 0.01f);
 	}
+
+
+	if (glfwGetKey(_window, GLFW_KEY_F9) == GLFW_PRESS)
+	{
+		r_vertnormals ^= 1;
+	}
+
 }
 
 void Game::_UpdateInput(GLFWwindow* window)
@@ -539,7 +590,7 @@ void Game::_InitSoundSystem()
 
 	{
 		drwav_int16* pSampleData = drwav_open_file_and_read_pcm_frames_s16(
-			"res/sounds/music/the_other_side.wav",
+			"res/sounds/EditorPlaceElementError.wav",
 			&monoData.channels,
 			&monoData.sampleRate,
 			&monoData.totalPCMFrameCount,
@@ -603,16 +654,6 @@ void Game::_InitSoundSystem()
 	alDeleteSources(1, &monoSoundBuffer);
 	alcMakeContextCurrent(nullptr);
 	alec(alcCloseDevice(device));
-
-
-
-
-
-
-
-
-
-
 }
 
 // Constructors
@@ -759,30 +800,13 @@ void Game::_TestFunction()
 		glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
-
 	// Light matrices orthographic projection
 	glm::mat4 orthogonalProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 75.0f);
 	glm::mat4 lightView = glm::lookAt(glm::vec3(0.0f, 8.0f, 8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	_lightProjection = orthogonalProjection * lightView;
 
-
 	// Init uniforms (move later)
 	_shaders[1]->SetMat4fv(_lightProjection, "lightProjection");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**	POST PROCESSING, USE LATER
 
@@ -853,21 +877,13 @@ void Game::_TestFunction()
 
 void Game::Render()
 {
-//	for (auto& i : _textures)
-//	{
-//		std::cout << "Screaming in all dimensions: " << i->GetID() << "\n";
-//	}
-//	std::cout << "and the framebuffer " << framebufferTexture << "\n";
-
-	// First, make sure to bind the framebuffer before ANYTHING is drawn, including a ClearColor background
-//			glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-	glEnable(GL_DEPTH_TEST);
-	glViewport(0, 0, _shadowMapWidth, _shadowMapHeight);
-	glBindFramebuffer(GL_FRAMEBUFFER, _shadowMapFBO);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		for (auto& x : _models)
-			x->Draw(_shaders[1]); // Draw into shadow shader!
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//	glEnable(GL_DEPTH_TEST);
+//	glViewport(0, 0, _shadowMapWidth, _shadowMapHeight);
+//	glBindFramebuffer(GL_FRAMEBUFFER, _shadowMapFBO);
+//		glClear(GL_DEPTH_BUFFER_BIT);
+//		for (auto& x : _models)
+//			x->Draw(_shaders[1]); // Draw into shadow shader!
+//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
 
@@ -883,7 +899,7 @@ void Game::Render()
 	_shaders[SHADER_CORE_PROGRAM]->Use();
 
 
-	_UpdateUniforms(); // Update matrices related to drawing from the camera -- this is done before drawing models for obvious reasons
+	_UpdateUniforms(_shaders[SHADER_CORE_PROGRAM]); // Update matrices related to drawing from the camera -- this is done before drawing models for obvious reasons
 
 
 	_materials[MAT1]->SendToShader(*(_shaders[SHADER_CORE_PROGRAM]));
@@ -904,12 +920,15 @@ void Game::Render()
 	_textures[TEX_ROCK32]->Bind(0);
 	_textures[TEX_ROCK32_SPEC]->Bind(1);
 
-	for (auto& x : _models)
-		x->Draw(_shaders[SHADER_CORE_PROGRAM]); // Draw into core shader!
+//	glCullFace(GL_FRONT);
+	for (auto& m : _models)
+		m->Draw(_shaders[SHADER_CORE_PROGRAM]); // Draw into core shader!
+//	glCullFace(GL_BACK);
+//	for (auto& m : _models)
+//		m->Draw(_shaders[SHADER_CORE_PROGRAM]); // Draw into core shader!
 
-	// REMOVE
-	kotlin.Draw(_shaders[SHADER_CORE_PROGRAM]);
 
+	
 
 	_shaders[SHADER_CORE_PROGRAM]->UnUse();
 
@@ -922,8 +941,19 @@ void Game::Render()
 //			glDrawArrays(GL_TRIANGLES, 0, 6);
 //				glEnable(GL_CULL_FACE);
 
+	if (r_vertnormals)
+	{
+		_shaders[DEBUG_NORMALS]->Use();
+		_UpdateUniforms(_shaders[DEBUG_NORMALS]);
+		for (auto& m : _models)
+			m->Draw(_shaders[DEBUG_NORMALS]);
 
-	// End Draw -- cleanup on aisle 6
+		_shaders[DEBUG_NORMALS]->UnUse();
+	}
+
+
+
+	// End draw, start cleanup
 	glfwSwapBuffers(_window);
 	glFlush();
 
@@ -932,41 +962,6 @@ void Game::Render()
 	glActiveTexture(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_TEXTURE_2D, 0);
-
-/*
-	// Update
-
-	// Clear
-	glClearColor(0.4862745f, 0.7647058f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-	// Update uniforms
-	_UpdateUniforms();
-	_materials[MAT1]->SendToShader(*(_shaders[SHADER_CORE_PROGRAM]));
-
-	// Use the program -- should be AFTER calling Set functions from the shader class, since they Use and UnUse the program!!
-	_shaders[SHADER_CORE_PROGRAM]->Use();
-	
-
-	// Activate a texture
-	_textures[TEX_ROCK32]->Bind(0);
-	_textures[TEX_ROCK32_SPEC]->Bind(1);
-
-	// Draw
-	for (auto& x : _models)
-	{
-		x->Render(_shaders[SHADER_CORE_PROGRAM]);
-	}
-
-	// End Draw -- cleanup on aisle 6
-	glfwSwapBuffers(window);
-	glFlush();
-
-	glBindVertexArray(0);
-	glUseProgram(0);
-	glActiveTexture(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindFramebuffer(GL_TEXTURE_2D, 0);*/
 }
 
 

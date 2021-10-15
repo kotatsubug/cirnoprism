@@ -2,18 +2,33 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
+#include <map>
 
 #include "renderer/vertex.hh"
 #include "renderer/shader.hh"
 #include "renderer/texture.hh"
 #include "renderer/material.hh"
 #include "renderer/primitives.hh"
-#include "objloader.hh"
+#include "common.hh"
+
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
+
+#include "math/math_linalg.hh"
+#include "math/math_quat.hh"
+
+#include "util/md5_importer.hh"
+#include "util/obj_importer.hh"
+
+#include "renderer/skeletal_animation.hh"
 
 class Mesh
 {
 private:
-	Vertex* _vertices; // Vertex array
+	// OpenGL
+	PerVertexData* _vertices; // Vertex array
 	uint32_t _numVertices;
 	GLuint* _indices; // Index array
 	uint32_t _numIndices;
@@ -29,18 +44,31 @@ private:
 
 	glm::mat4 _modelMatrix;
 
+
 	void _InitMeshBuffers();
 	void _UpdateModelMatrix();
 	void _UpdateUniforms(Shader* shader);
+	void _UpdateAnimations();
+
+	
+	BoneTreeNode _boneHierarchy; // Tree of all translation/rotation bone transforms
+	uint32_t _numBones;
+
+	Animator _animator;
+	
+	std::vector<glm::mat4> _GetBoneTransforms();
+	void _AddBonesToArray(BoneTreeNode& bone, std::vector<glm::mat4>& boneMatrices);
+
 public:
-	Mesh(
-		Vertex* vertices, const uint32_t& numVertices,
-		GLuint* indices, const uint32_t& numIndices,
-		glm::vec3 position = glm::vec3(0.0f),
-		glm::vec3 origin = glm::vec3(0.0f),
-		glm::vec3 rotation = glm::vec3(0.0f),
-		glm::vec3 scale = glm::vec3(1.0f)
-	);
+//	Mesh(
+//		Vertex* vertices, const uint32_t& numVertices,
+//		GLuint* indices, const uint32_t& numIndices,
+//		glm::vec3 position = glm::vec3(0.0f),
+//		glm::vec3 origin = glm::vec3(0.0f),
+//		glm::vec3 rotation = glm::vec3(0.0f),
+//		glm::vec3 scale = glm::vec3(1.0f)
+//	);
+
 	Mesh(
 		Primitive* primitive,
 		glm::vec3 position = glm::vec3(0.0f),
@@ -48,9 +76,17 @@ public:
 		glm::vec3 rotation = glm::vec3(0.0f),
 		glm::vec3 scale = glm::vec3(1.0f)
 	);
+
 	Mesh(
-		const Mesh& other
+		const std::string& path,
+		const uint16_t type = 0x0000,
+		glm::vec3 position = glm::vec3(0.0f),
+		glm::vec3 origin = glm::vec3(0.0f),
+		glm::vec3 rotation = glm::vec3(0.0f),
+		glm::vec3 scale = glm::vec3(1.0f)
 	);
+
+	Mesh(const Mesh& other);
 
 	virtual ~Mesh();
 
@@ -64,5 +100,6 @@ public:
 	inline void Translate(const glm::vec3 val){ _position += val; }
 	inline void Rotate(const glm::vec3 val){ _rotation += val; }
 	inline void Scale(const glm::vec3 val){ _scale += val; }
+
 
 };

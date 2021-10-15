@@ -23,10 +23,8 @@
 
 enum OBJ_INDICES_TYPE { VERTS_ONLY = 0, VERTS_INDICES, VERTS_TEXCOORDS_NORMALS };
 
-// TODO: This importer does not auto-triangulate quads yet!
-
 /// Returns an array of Vertex structs -- vectors of vertices, texture coordinates (if they exist), and normals (if they exist) -- from an OBJ file.
-static std::vector<Vertex> ImportOBJ(const std::string& filename) noexcept
+static bool ImportOBJ(const std::string& filename, std::vector<PerVertexData>& verticesOut) noexcept
 {
 	// Vertex stuff
 	std::vector<glm::fvec3> vertex_positions;
@@ -37,9 +35,6 @@ static std::vector<Vertex> ImportOBJ(const std::string& filename) noexcept
 	std::vector<GLint> vertex_position_indices;
 	std::vector<GLint> vertex_texcoord_indices;
 	std::vector<GLint> vertex_normal_indices;
-
-	// Vertex array
-	std::vector<Vertex> vertices;
 
 	std::stringstream ss;
 	std::ifstream in_file(filename);
@@ -52,71 +47,74 @@ static std::vector<Vertex> ImportOBJ(const std::string& filename) noexcept
 	if (!std::filesystem::exists(filename))
 	{
 		DEBUG_LOG("OBJLoader", LOG_ERROR, "Could not open [%s] (file does not exist)", filename.c_str());
-		return vertices;
+		return 0;
 	}
 
 	if (!in_file.is_open())
 	{
 		DEBUG_LOG("OBJLoader", LOG_ERROR, "Could not open [%s] (file could not be read)", filename.c_str());
-		return vertices;
+		return 0;
 	}
 
 	// OBJ files describe indices in different ways
 	// They can either be 'v v v', 'v//n v//n v//n', or 'v/t/n v/t/n v/t/n'
 	// Below: figure out what format the file uses
-	short format = -1;
-	while (std::getline(in_file, line))
+	int8_t format = -1;
 	{
-		ss.clear();
-		ss.str(line);
-		ss >> prefix;
-
-		if (prefix == "f")
+		bool finished = false;
+		while (std::getline(in_file, line) && !finished)
 		{
-			std::regex hasNoSlashes(R"(^[^/]+$)");
-			if (std::regex_search(line, hasNoSlashes))
+			ss.clear();
+			ss.str(line);
+			ss >> prefix;
+
+			if (prefix == "f")
 			{
-				format = OBJ_INDICES_TYPE::VERTS_ONLY;
-			}
-			else
-			{
-				std::regex hasDoubleSlashes(R"((?:\/\/))");
-				if (std::regex_search(line, hasDoubleSlashes))
+				std::regex hasNoSlashes(R"(^[^/]+$)");
+				if (std::regex_search(line, hasNoSlashes))
 				{
-					format = OBJ_INDICES_TYPE::VERTS_INDICES;
+					format = OBJ_INDICES_TYPE::VERTS_ONLY;
 				}
 				else
 				{
-					format = OBJ_INDICES_TYPE::VERTS_TEXCOORDS_NORMALS;
+					std::regex hasDoubleSlashes(R"((?:\/\/))");
+					if (std::regex_search(line, hasDoubleSlashes))
+					{
+						format = OBJ_INDICES_TYPE::VERTS_INDICES;
+					}
+					else
+					{
+						format = OBJ_INDICES_TYPE::VERTS_TEXCOORDS_NORMALS;
+					}
 				}
-			}
 
-			goto finished_setting_obj_indices_type; // Don't need to scan other 'f' lines
+				finished = true;
+			}
 		}
 	}
-finished_setting_obj_indices_type:
 
 	/*
-		* From people.cs.clemson.edu/~dhouse/courses/405/docs/brief-obj-file-format.html
-		*
-		* Vertex data:
-		* 	v    Geometric vertices:                   v x y z
-		* 	vt   Texture vertices:                     vt u v
-		* 	vn   Vertex normals:                       vn dx dy dz
-		* Elements:
-		* 	p    Point:                                p v1
-		* 	l    Line:                                 l v1 v2 ... vn
-		* 	f    Face:                                 f v1 v2 ... vn
-		* 	f    Face with texture coords:             f v1/t1 v2/t2 .... vn/tn
-		* 	f    Face with vertex normals:             f v1//n1 v2//n2 .... vn//nn
-		* 	f    Face with txt and norms:              f v1/t1/n1 v2/t2/n2 .... vn/tn/nn
-		* Grouping:
-		* 	g          Group name:                     g groupname
-		* Display/render attributes:
-		* 	usemtl     Material name:                  usemtl materialname
-		* 	mtllib     Material library:               mtllib materiallibname.mtl
-		*/
+	* From people.cs.clemson.edu/~dhouse/courses/405/docs/brief-obj-file-format.html
+	*
+	* Vertex data:
+	* 	v    Geometric vertices:                   v x y z
+	* 	vt   Texture vertices:                     vt u v
+	* 	vn   Vertex normals:                       vn dx dy dz
+	* Elements:
+	* 	p    Point:                                p v1
+	* 	l    Line:                                 l v1 v2 ... vn
+	* 	f    Face:                                 f v1 v2 ... vn
+	* 	f    Face with texture coords:             f v1/t1 v2/t2 .... vn/tn
+	* 	f    Face with vertex normals:             f v1//n1 v2//n2 .... vn//nn
+	* 	f    Face with txt and norms:              f v1/t1/n1 v2/t2/n2 .... vn/tn/nn
+	* Grouping:
+	* 	g          Group name:                     g groupname
+	* Display/render attributes:
+	* 	usemtl     Material name:                  usemtl materialname
+	* 	mtllib     Material library:               mtllib materiallibname.mtl
+	*/
 
+	in_file.clear();
 	in_file.seekg(0, in_file.beg); // Send stream to start of file so vertices can be read
 
 	// For every new line in the file...
@@ -238,23 +236,19 @@ finished_setting_obj_indices_type:
 
 			default:
 				DEBUG_LOG("OBJLoader", LOG_ERROR, "Could not open [%s] (unknown .OBJ indices formatting)", filename.c_str());
-				return vertices;
-				break;
+				return 0;
 			}
-		}
-		else
-		{
-
 		}
 	}
 
 	// Finally, compile final vertex array for mesh...
-	vertices.resize(vertex_position_indices.size(), Vertex());
+	std::vector<PerVertexData> vertices;
+	vertices.resize(vertex_position_indices.size(), PerVertexData());
 
 	// ... and load in all indices
 	for (size_t i = 0; i < vertices.size(); ++i)
 	{
-		vertices[i].position = vertex_positions[vertex_position_indices[i] - 1];
+		vertices[i].position = vertex_positions[vertex_position_indices[i] - 1]; // OBJ's don't index from 0???
 
 		if (vertex_texcoords.size() > 0)
 			vertices[i].texcoord = vertex_texcoords[vertex_texcoord_indices[i] - 1];
@@ -269,12 +263,14 @@ finished_setting_obj_indices_type:
 
 	DEBUG_LOG("OBJLoader", LOG_SUCCESS, "Model [%s] loaded in format [%i] with [%i] vertices, [%i] texcoords, and [%i] normals!", filename.c_str(), format, vertex_positions.size(), vertex_texcoords.size(), vertex_normals.size());
 
-	return vertices;
+	verticesOut = vertices;
+
+	return 1;
 }
 
 /// Returns an array of just the position vectors from the vertex data of an OBJ file.
 /// Used in algorithms like QuickHull to shrink-wrap models for collision meshes, where texcoords/normals/indices are not needed.
-static std::vector<glm::vec3> ImportOBJVertices(const std::string& filename) noexcept
+static std::vector<glm::vec3> ImportOBJPositions(const std::string& filename) noexcept
 {
 	std::vector<glm::vec3> positions;
 

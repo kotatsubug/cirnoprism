@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math.hh"
+#include "math/math_etc.hh"
 
 class InputControl
 {
@@ -22,5 +22,5 @@ inline void InputControl::AddAmt(float val)
 
 inline float InputControl::GetAmt()
 {
-	return Math::Clamp(_amt, -1.0f, 1.0f);
+	return qt::Clamp(_amt, -1.0f, 1.0f);
 }

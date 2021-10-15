@@ -1,10 +1,10 @@
 #pragma once
 
+#include "renderer/mesh.hh"
+
 #include "renderer/shader.hh"
 #include "renderer/texture.hh"
 #include "renderer/material.hh"
-#include "renderer/mesh.hh"
-#include "objloader.hh"
 
 class Model
 {
@@ -13,6 +13,7 @@ private:
 	Texture* _overrideTextureDiffuse;
 	Texture* _overrideTextureSpecular;
 	std::vector<Mesh*> _meshes;
+
 	glm::vec3 _position;
 public:
 	Model(
@@ -32,33 +33,6 @@ public:
 		{
 			_meshes.push_back(new Mesh(*i));
 		}
-
-		for (auto& i : _meshes)
-		{
-			i->Translate(_position);
-			i->SetOrigin(_position);
-		}
-	}
-
-	Model(
-		glm::vec3 position,
-		Material* material,
-		Texture* orTexDiff,
-		Texture* orTexSpec,
-		const char* objFile
-	)
-	{
-		_position = position;
-		_material = material;
-		_overrideTextureDiffuse = orTexDiff;
-		_overrideTextureSpecular = orTexSpec;
-
-		std::vector<Vertex> object = ImportOBJ(objFile);
-		_meshes.push_back(new Mesh(object.data(), object.size(), NULL, 0, glm::vec3(1.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f),
-			glm::vec3(0.0f),
-			glm::vec3(1.0f)
-		));
 
 		for (auto& i : _meshes)
 		{

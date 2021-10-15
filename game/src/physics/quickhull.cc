@@ -146,7 +146,7 @@ void QuickHull::_CreateConvexHalfEdgeMesh() {
 			}
 			else
 			{
-				const Plane& P = pvf._P;
+				const qt::Plane& P = pvf._P;
 				pvf._visibilityCheckedOnIteration = iter;
 				const float d = glm::dot(P._N, activePoint) + P._D;
 
@@ -276,8 +276,8 @@ void QuickHull::_CreateConvexHalfEdgeMesh() {
 
 			auto& newFace = _mesh._faces[newFaceIndex];
 
-			const glm::vec3 planeNormal = Math::GetTriangleNormal(_vertexData[A], _vertexData[B], activePoint);
-			newFace._P = Plane(planeNormal, activePoint);
+			const glm::vec3 planeNormal = qt::GetTriangleNormalCW(_vertexData[A], _vertexData[B], activePoint);
+			newFace._P = qt::Plane(planeNormal, activePoint);
 			newFace._he = AB;
 
 			_mesh._halfEdges[CA]._opp = _newHalfEdgeIndices[i > 0 ? i * 2 - 1 : 2 * horizonEdgeCount - 1];
@@ -455,8 +455,8 @@ void QuickHull::_SetupInitialTetrahedron()
 			std::min((size_t)3,vertexCount - 1)
 		};
 
-		const glm::vec3 N = Math::GetTriangleNormal(_vertexData[v[0]], _vertexData[v[1]], _vertexData[v[2]]);
-		const Plane trianglePlane(N, _vertexData[v[0]]);
+		const glm::vec3 N = qt::GetTriangleNormalCW(_vertexData[v[0]], _vertexData[v[1]], _vertexData[v[2]]);
+		const qt::Plane trianglePlane(N, _vertexData[v[0]]);
 		if (trianglePlane.IsPointOnPositiveSide(_vertexData[v[3]]))
 		{
 			std::swap(v[0], v[1]);
@@ -498,12 +498,12 @@ void QuickHull::_SetupInitialTetrahedron()
 	}
 
 	// Find the most distant point to the line between the two chosen extreme points.
-	const Ray r(_vertexData[selectedPoints.first], (_vertexData[selectedPoints.second] - _vertexData[selectedPoints.first]));
+	const qt::Ray r(_vertexData[selectedPoints.first], (_vertexData[selectedPoints.second] - _vertexData[selectedPoints.first]));
 	maxD = _epsilonSquared;
 	size_t maxI = std::numeric_limits<size_t>::max();
 	const size_t vCount = _vertexData.size();
 	for (size_t i = 0; i < vCount; i++) {
-		const float distToRay = Math::SquaredDistanceBetweenPointAndRay(_vertexData[i], r);
+		const float distToRay = qt::SquaredDistanceBetweenPointAndRay(_vertexData[i], r);
 		if (distToRay > maxD)
 		{
 			maxD = distToRay;
@@ -537,11 +537,11 @@ void QuickHull::_SetupInitialTetrahedron()
 	// Next step is to find the 4th vertex of the tetrahedron. We naturally choose the point farthest away from the triangle plane.
 	maxD = _epsilon;
 	maxI = 0;
-	const glm::vec3 N = Math::GetTriangleNormal(baseTriangleVertices[0], baseTriangleVertices[1], baseTriangleVertices[2]);
-	Plane trianglePlane(N, baseTriangleVertices[0]);
+	const glm::vec3 N = qt::GetTriangleNormalCW(baseTriangleVertices[0], baseTriangleVertices[1], baseTriangleVertices[2]);
+	qt::Plane trianglePlane(N, baseTriangleVertices[0]);
 	for (size_t i = 0; i < vCount; i++)
 	{
-		const float d = std::abs(Math::DistanceToPlaneSigned(_vertexData[i], trianglePlane));
+		const float d = std::abs(qt::DistanceToPlaneSigned(_vertexData[i], trianglePlane));
 		if (d > maxD)
 		{
 			maxD = d;
@@ -550,9 +550,10 @@ void QuickHull::_SetupInitialTetrahedron()
 	}
 	if (maxD == _epsilon)
 	{
-		// All the points seem to lie on a 2D subspace of R^3. How to handle this? Well, let's add one extra point to the point cloud so that the convex hull will have volume.
+		// All the points seem to lie on a 2D subspace of R^3. How to handle this?
+		// Well, let's add one extra point to the point cloud so that the convex hull will have volume.
 		_planar = true;
-		const glm::vec3 N1 = Math::GetTriangleNormal(baseTriangleVertices[1], baseTriangleVertices[2], baseTriangleVertices[0]);
+		const glm::vec3 N1 = qt::GetTriangleNormalCW(baseTriangleVertices[1], baseTriangleVertices[2], baseTriangleVertices[0]);
 		_planarPointCloudTemp.clear();
 		_planarPointCloudTemp.insert(_planarPointCloudTemp.begin(), _vertexData.begin(), _vertexData.end());
 		const glm::vec3 extraPoint = N1 + _vertexData[0];
@@ -562,7 +563,7 @@ void QuickHull::_SetupInitialTetrahedron()
 	}
 
 	// Enforce CCW orientation (if user prefers clockwise orientation, swap two vertices in each triangle when final mesh is created)
-	const Plane triPlane(N, baseTriangleVertices[0]);
+	const qt::Plane triPlane(N, baseTriangleVertices[0]);
 	if (triPlane.IsPointOnPositiveSide(_vertexData[maxI]))
 	{
 		std::swap(baseTriangle[0], baseTriangle[1]);
@@ -576,8 +577,8 @@ void QuickHull::_SetupInitialTetrahedron()
 		const glm::vec3& va = _vertexData[v[0]];
 		const glm::vec3& vb = _vertexData[v[1]];
 		const glm::vec3& vc = _vertexData[v[2]];
-		const glm::vec3 N1 = Math::GetTriangleNormal(va, vb, vc);
-		const Plane plane(N1, va);
+		const glm::vec3 N1 = qt::GetTriangleNormalCW(va, vb, vc);
+		const qt::Plane plane(N1, va);
 		f._P = plane;
 	}
 

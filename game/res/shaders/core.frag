@@ -95,7 +95,7 @@ float CalculateShadow(vec4 fragPosLight)
 
 // Scatters light (uniformly) similar to car headlights on a foggy day but without raymarching,
 // instead by summing total light that hits the camera using inverse square distance as magnitude in an antiderivative
-float FastScatter(in vec3 lightPos)
+float FastScatter(in vec3 lightPos, in const float clampRadius)
 {
 	// Method by https://ijdykeman.github.io/graphics/simple_fog_shader
 
@@ -103,11 +103,17 @@ float FastScatter(in vec3 lightPos)
 	const vec3 c = camPosition;
 	const vec3 L = lightPos;
 
+	if (distance(c, L) > clampRadius)
+	{
+		return 0.0; // Only return the rest if h is within bounds of a "light sphere" radius to save performance
+	}
+
 	// Project to a 2D plane where the x-axis is the line from the camera to the world fragment position,
 	// and the y-axis is the direction from the light source to the x-axis
 
 	const vec3 xDir = ((w - c) / distance(w, c));
 		vec3 P = c + (xDir * dot(xDir, L - c)); // P is the point on line CW closest to L
+
 		// Now, make sure P lies on segment CW. If it doesn't, choose nearest point W or C.
 		// If this were a point-to-an-infinite-line calculation, this part below could have been removed
 		const float D_wP = distance(w, P);
@@ -127,21 +133,25 @@ float FastScatter(in vec3 lightPos)
 	const vec3 yDir = ((P - L) / distance(P, L));
 
 	// Get transformed 2D coordinates from the projection of 3D coordinates onto the new plane
-	// Treat camera position as the origin of this new plane, X and Y directions were inferred above
-	// TODO: shouldn't this be dot(xDir, c-c) and dot(xDir,w)?????
-	const float c_tx = dot(xDir, c); // y's not needed here
-	const float w_tx = dot(xDir, w);
-	const float L_ty = dot(yDir, L - c); // x's not needed here
+	// Treat camera position as the origin of this new plane
+	const float c_tx = 0.0; // c - c = 0, so dot product is 0
+	const float w_tx = dot(xDir, w - c);
+	const float L_ty = dot(yDir, L - c);
 	const float P_ty = dot(yDir, P - c);
 
-	// Finally, integrate the distance sqrt(x^2 + h^2) as ./'c->w 1/(h^2 + x^2)dx on the new x-axis,
-	// summing up all the "fragments" of light as 1/d^2 for an illuminated fog effect
+	// Finally, integrate  1/(h^2 + x^2) dx from c to w on the new x-axis,
+	// summing up all the "fragments" of light since intensity = 1/distance^2
+	// This illuminates the fog if the fragments of light are added to existing frag luminosity
 	const float h = abs(P_ty - L_ty);
 	const float integral = (1.0/h)*(atan(w_tx/h) - atan(c_tx/h));
 
-	// TODO: Only perform these calculations if w is within bounds of a "light sphere" radius to save performance
 	return integral;
 }
+
+//vec4 CalculateIridescence(Material material, vec3 vs_position, vec3 vs_normal, vec3 lightPos, vec3 camPosition)
+//{
+//	
+//}
 
 void main()
 {
@@ -169,7 +179,7 @@ void main()
 	vec4 finalTexColor = difTexColor * (vec4(ambientFinal, 1.0) + ((vec4((1.0 - shadow) * diffuseFinal, 1.0)))) * vec4(vs_color, 1.0);
 	vec4 finalEmissiveTexColor = 1.3 * (texture(material.diffuseTex, vs_texcoord) * texture(material.emissiveTex, vs_texcoord));
 
-	fs_color = vec4(vec3(FastScatter(pointLight.position)), 1.0) + mix(finalTexColor, finalEmissiveTexColor, 0.5); 
+	fs_color = vec4(vec3(FastScatter(pointLight.position, 32.0)), 1.0) + mix(finalTexColor, finalEmissiveTexColor, 0.5); 
 //	fs_color = texture(material.diffuseTex, vs_texcoord) * (vec4(ambientFinal, 1.0) + ((vec4((1.0 - shadow) * diffuseFinal, 1.0) + vec4((1.0 - shadow) * specularFinal, 1.0)))) * vec4(vs_color, 1.0);
 //	fs_color = vec4((1.0 - shadow) * material.diffuse, 1.0) * vec4(vs_color, 1.0);
 	

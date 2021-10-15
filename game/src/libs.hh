@@ -37,4 +37,18 @@
 #include "renderer/framebuffer.hh"
 #include "renderer/camera.hh"
 
-#include "objloader.hh"
+
+/// Cirnoprism numerical 16-bit flags
+#define RENDER_BACKFACE_CULLING 0x0000
+#define RENDER_FRONTFACE_CULLING 0x0001
+#define RENDER_SINGLE_SIDED_FACES 0x0000
+#define RENDER_DOUBLE_SIDED_FACES 0x0002
+// #define CATEGORY_TYPE 0x0001 (01)
+// #define CATEGORY_TYPE 0x0002 (10)
+// #define CATEGORY_TYPE 0x0004 (100)
+// #define CATEGORY_TYPE 0x0008 (1000)
+// #define CATEGORY_TYPE 0x0010 (10000)
+// #define CATEGORY_TYPE 0x0020 (100000)
+// #define CATEGORY_TYPE 0x0040 (1000000)
+// #define CATEGORY_TYPE 0x0080 (10000000)
+// #define CATEGORY_TYPE 0x0100 (100000000)

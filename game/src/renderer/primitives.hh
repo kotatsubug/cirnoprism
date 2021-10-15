@@ -10,7 +10,7 @@
 class Primitive
 {
 private:
-	std::vector<Vertex> _vertices;
+	std::vector<PerVertexData> _vertices;
 	std::vector<GLuint> _indices;
 public:
 	Primitive()
@@ -25,7 +25,7 @@ public:
 
 	// Functions
 	void Set(
-		const Vertex* vertices,
+		const PerVertexData* vertices,
 		const unsigned numberOfVertices,
 		const GLuint* indices,
 		const unsigned numberOfIndices)
@@ -41,7 +41,7 @@ public:
 		}
 	}
 
-	inline Vertex* GetVertices() { return _vertices.data(); }
+	inline PerVertexData* GetVertices() { return _vertices.data(); }
 	inline GLuint* GetIndices() { return _indices.data(); }
 	inline unsigned GetNumberOfVertices() const { return _vertices.size(); }
 	inline unsigned GetNumberOfIndices() const { return _indices.size(); }
@@ -55,15 +55,15 @@ public:
 	Quad()
 		: Primitive() // Also call the constructor
 	{
-		Vertex vertices[] =
+		PerVertexData vertices[] =
 		{
-			// Position | Color | TexCoords | Normals(will be calculated on the fly using a geometry shader later)
-			glm::vec3(-0.5f, 0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 1.0f),	glm::vec3(0.0f, 0.0f, 1.0f),
-			glm::vec3(-0.5f, -0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f),	glm::vec3(0.0f, 0.0f, 1.0f),
-			glm::vec3(0.5f, -0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f),	glm::vec3(0.0f, 0.0f, 1.0f),
-			glm::vec3(0.5f, 0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 1.0f),	glm::vec3(0.0f, 0.0f, 1.0f),
+			// Position | Color | TexCoords | Normals | BoneIDs | BoneWeights
+			glm::vec3(-0.5f, 0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 1.0f),	glm::vec3(0.0f, 0.0f, 1.0f), glm::ivec4(0), glm::vec4(0.0f),
+			glm::vec3(-0.5f, -0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f),	glm::vec3(0.0f, 0.0f, 1.0f), glm::ivec4(0), glm::vec4(0.0f),
+			glm::vec3(0.5f, -0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f),	glm::vec3(0.0f, 0.0f, 1.0f), glm::ivec4(0), glm::vec4(0.0f),
+			glm::vec3(0.5f, 0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 1.0f),	glm::vec3(0.0f, 0.0f, 1.0f), glm::ivec4(0), glm::vec4(0.0f)
 		};
-		unsigned numberOfVertices = sizeof(vertices) / sizeof(Vertex);
+		unsigned numberOfVertices = sizeof(vertices) / sizeof(PerVertexData);
 
 		GLuint indices[] =
 		{
@@ -82,25 +82,25 @@ public:
 	Pyramid()
 		: Primitive()
 	{
-		Vertex vertices[] =
+		PerVertexData vertices[] =
 		{
-			glm::vec3(0.0f, 0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.5f, 1.0f),	glm::vec3(0.0f, 0.0f, 1.0f),
-			glm::vec3(-0.5f, -0.5f, 0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f),	glm::vec3(0.0f, 0.0f, 1.0f),
-			glm::vec3(0.5f, -0.5f, 0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f),	glm::vec3(0.0f, 0.0f, 1.0f),
+			glm::vec3(0.0f, 0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.5f, 1.0f),	glm::vec3(0.0f, 0.0f, 1.0f),  glm::ivec4(0), glm::vec4(0.0f),
+			glm::vec3(-0.5f, -0.5f, 0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f),	glm::vec3(0.0f, 0.0f, 1.0f),  glm::ivec4(0), glm::vec4(0.0f),
+			glm::vec3(0.5f, -0.5f, 0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f),	glm::vec3(0.0f, 0.0f, 1.0f),  glm::ivec4(0), glm::vec4(0.0f),
+																																  
+			glm::vec3(0.0f, 0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.5f, 1.0f),	glm::vec3(-1.0f, 0.0f, 0.0f), glm::ivec4(0), glm::vec4(0.0f),
+			glm::vec3(-0.5f, -0.5f, -0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f),	glm::vec3(-1.0f, 0.0f, 0.0f), glm::ivec4(0), glm::vec4(0.0f),
+			glm::vec3(-0.5f, -0.5f, 0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f),	glm::vec3(-1.0f, 0.0f, 0.0f), glm::ivec4(0), glm::vec4(0.0f),
 
-			glm::vec3(0.0f, 0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.5f, 1.0f),	glm::vec3(-1.0f, 0.0f, 0.0f),
-			glm::vec3(-0.5f, -0.5f, -0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f),	glm::vec3(-1.0f, 0.0f, 0.0f),
-			glm::vec3(-0.5f, -0.5f, 0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f),	glm::vec3(-1.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.5f, 1.0f),	glm::vec3(0.0f, 0.0f, -1.0f), glm::ivec4(0), glm::vec4(0.0f),
+			glm::vec3(0.5f, -0.5f, -0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f),	glm::vec3(0.0f, 0.0f, -1.0f), glm::ivec4(0), glm::vec4(0.0f),
+			glm::vec3(-0.5f, -0.5f, -0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f),	glm::vec3(0.0f, 0.0f, -1.0f), glm::ivec4(0), glm::vec4(0.0f),
 
-			glm::vec3(0.0f, 0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.5f, 1.0f),	glm::vec3(0.0f, 0.0f, -1.0f),
-			glm::vec3(0.5f, -0.5f, -0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f),	glm::vec3(0.0f, 0.0f, -1.0f),
-			glm::vec3(-0.5f, -0.5f, -0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f),	glm::vec3(0.0f, 0.0f, -1.0f),
-
-			glm::vec3(0.0f, 0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.5f, 1.0f),	glm::vec3(1.0f, 0.0f, 0.0f),
-			glm::vec3(0.5f, -0.5f, 0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f),	glm::vec3(1.0f, 0.0f, 0.0f),
-			glm::vec3(0.5f, -0.5f, -0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f),	glm::vec3(1.0f, 0.0f, 0.0f)
+			glm::vec3(0.0f, 0.5f, 0.0f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.5f, 1.0f),	glm::vec3(1.0f, 0.0f, 0.0f),  glm::ivec4(0), glm::vec4(0.0f),
+			glm::vec3(0.5f, -0.5f, 0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f),	glm::vec3(1.0f, 0.0f, 0.0f),  glm::ivec4(0), glm::vec4(0.0f),
+			glm::vec3(0.5f, -0.5f, -0.5f),	glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f),	glm::vec3(1.0f, 0.0f, 0.0f),  glm::ivec4(0), glm::vec4(0.0f)
 		};
-		unsigned numberOfVertices = sizeof(vertices) / sizeof(Vertex);
+		unsigned numberOfVertices = sizeof(vertices) / sizeof(PerVertexData);
 
 		this->Set(vertices, numberOfVertices, nullptr, 0);
 	}

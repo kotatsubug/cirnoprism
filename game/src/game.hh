@@ -15,7 +15,7 @@
 
 #define _DEBUG 1
 
-enum ShaderEnum { SHADER_CORE_PROGRAM = 0 };
+enum ShaderEnum { SHADER_CORE_PROGRAM = 0, SHADOW, DEBUG_NORMALS };
 enum TextureEnum { TEX_ROCK32 = 0, TEX_ROCK32_SPEC };
 enum MaterialEnum { MAT1 = 0 };
 
@@ -121,8 +121,6 @@ public:
 class Game
 {
 private:
-	SkinnedMesh kotlin;
-
 	// GLFW
 	GLFWwindow* _window;
 		const int _WINDOW_WIDTH, _WINDOW_HEIGHT;
@@ -148,7 +146,10 @@ private:
 	double _mouseOffsetY;
 	bool _firstMouse;
 
-	// TODO TEST FUNCTION REMOVE LATER
+	// Cvars
+	bool r_vertnormals = false;
+
+	// TODO: Framebuffer testing, remove later!
 //	unsigned int FBO, framebufferTexture, RBO, rectVAO, rectVBO;
 	unsigned int _shadowMapFBO, _shadowMapID;
 	unsigned int _shadowMapWidth = 1024, _shadowMapHeight = 1024;
@@ -204,7 +205,7 @@ private:
 	void _InitECS();
 
 
-	void _UpdateUniforms();
+	void _UpdateUniforms(Shader* shader);
 //	void _UpdateCameraUniforms();
 
 	void _UpdateDeltaTime();

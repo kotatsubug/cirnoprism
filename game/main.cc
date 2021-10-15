@@ -1,6 +1,5 @@
 #include "libs.hh"
 #include "game.hh"
-#include "math.hh"
 
 
 

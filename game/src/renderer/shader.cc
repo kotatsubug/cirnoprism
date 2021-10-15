@@ -153,4 +153,11 @@ void Shader::SetMat4fv(const glm::mat4& matrix, const std::string& name, GLboole
 {
 	GLint location = glGetUniformLocation(_id, name.c_str());
 	glUniformMatrix4fv(location, 1, transpose, glm::value_ptr(matrix));
+	
+}
+
+void Shader::SetArrMat4fv(const std::vector<glm::mat4>& matrices, const std::string& name, GLboolean transpose)
+{
+	GLint location = glGetUniformLocation(_id, name.c_str());
+	glUniformMatrix4fv(location, (GLsizei)(matrices.size()), transpose, glm::value_ptr(matrices[0]));
 }

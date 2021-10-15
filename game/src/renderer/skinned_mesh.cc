@@ -1,3 +1,4 @@
+#ifdef ESDEFJKSDFIJSDF
 #include "skinned_mesh.hh"
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -19,30 +20,54 @@ void SkinnedMesh::setBoneTransformations(Shader* shader, GLfloat currentTime)
 //	REMOVE: glUniformMatrix4fv(glGetUniformLocation(shader, "gBones"), (GLsizei)Transforms.size(), GL_FALSE, glm::value_ptr(Transforms[0]));
 }
 
-/// Adds a new bone.
-void SkinnedMesh::VertexBoneData::AddBoneData(unsigned int BoneID, float Weight)
-{
-	for (unsigned int i = 0; i < NUM_BONES_PER_VERTEX; ++i)
-	{
-		if (Weights[i] == 0.0)
-		{
-			IDs[i] = BoneID;
-			Weights[i] = Weight;
-			return;
-		}
-	}
-}
-
 SkinnedMesh::SkinnedMesh()
 	: currentAnimation(0)
 {
+	_position = glm::vec3(0.0f);
+	_origin = glm::vec3(0.0f);
+	_rotation = glm::vec3(0.0f);
+	_scale = glm::vec3(1.0f);
+
 	m_VAO = 0;
-	for (unsigned int i = 0; i < NUM_VBs; ++i)
-	{
-		m_Buffers[i] = 0;
-	}
+//	for (unsigned int i = 0; i < NUM_VBs; ++i)
+//	{
+	//	m_Buffers[i] = 0;
+		m_VBO = 0;
+//	}
 	m_NumBones = 0;
 	m_pScene = NULL;
+}
+
+/// Copy constructor
+/// Do not use if LoadModel or other pScene-populating function hasn't been called
+SkinnedMesh::SkinnedMesh(const SkinnedMesh& obj)
+	: currentAnimation(0)
+{
+	m_VAO = obj.m_VAO;
+
+//	memcpy(m_Buffers, obj.m_Buffers, sizeof(m_Buffers));
+	m_VBO = obj.m_VBO;
+	m_EBO = obj.m_EBO;
+
+	m_Entries = obj.m_Entries;
+	m_Textures = obj.m_Textures;
+	m_BoneMapping = obj.m_BoneMapping;
+	m_NumBones = obj.m_NumBones;
+	m_BoneInfo = obj.m_BoneInfo;
+	m_GlobalInverseTransform = obj.m_GlobalInverseTransform;
+	animDuration = obj.animDuration;
+	// currentAnimation resets to zero
+	m_pScene = obj.m_pScene;
+
+	_position = obj._position;
+	_origin = obj._origin;
+	_rotation = obj._rotation;
+	_scale = obj._scale;
+
+//	loadMesh("res/models/bob_lamp.md5mesh");
+	
+	// m_Importer shouldn't be needed since its only purpose is to populate m_pScene
+	// Shouldn't be needed unless m_pScene is NULL for some reason before copy constructor is called
 }
 
 SkinnedMesh::~SkinnedMesh()
@@ -52,13 +77,18 @@ SkinnedMesh::~SkinnedMesh()
 
 void SkinnedMesh::Clear()
 {
-	// Textures must not be deleted because they are GLuint
+	// Textures must not be deleted
 
 	// Deletes VBOs
-	if (m_Buffers[0] != 0)
+//	if (m_Buffers[0] != 0)
+//	{
+//		glDeleteBuffers(NUM_VBs, m_Buffers);
+	if (m_VBO != 0)
 	{
-		glDeleteBuffers(NUM_VBs, m_Buffers);
+		glDeleteBuffers(1, &m_VBO);
+		m_VBO = 0;
 	}
+//	}
 
 	// Deletes VAO
 	if (m_VAO != 0)
@@ -66,6 +96,17 @@ void SkinnedMesh::Clear()
 		glDeleteVertexArrays(1, &m_VAO);
 		m_VAO = 0;
 	}
+
+	// Delete EBO
+	if (m_EBO != 0)
+	{
+		glDeleteBuffers(1, &m_EBO);
+		m_EBO = 0;
+	}
+
+//	if (vertices.size() > 0)
+	delete[] vertices;
+	delete[] indices;
 }
 
 /// Loads the model.
@@ -75,11 +116,14 @@ bool SkinnedMesh::loadMesh(const std::string& fileName)
 	Clear();
 
 	/* Create the VAO */
-	glGenVertexArrays(1, &m_VAO);
+//	glGenVertexArrays(1, &m_VAO);
+//	glBindVertexArray(m_VAO);
+	glCreateVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);
 
 	/* Create VBOs for vertices attributes */
-	glGenBuffers(NUM_VBs, m_Buffers);
+//	glGenBuffers(NUM_VBs, m_Buffers);
+	glGenBuffers(1, &m_VBO);
 
 	/* Return value */
 	bool ret = false;
@@ -125,102 +169,171 @@ bool SkinnedMesh::InitFromScene(const aiScene* pScene, const std::string& fileNa
 	m_Entries.resize(pScene->mNumMeshes);
 	m_Textures.resize(pScene->mNumMaterials);
 
-	std::vector<glm::vec3> Positions;
-	std::vector<glm::vec3> _colors;
-	std::vector<glm::vec2> TexCoords;
-	std::vector<glm::vec3> Normals;
-	std::vector<VertexBoneData> Bones;
-	std::vector<unsigned int> Indices;
+	// The original ASSIMP skeletal importer used here created multiple VBOs for
+	// positions, texcoords, etc. as individual variables and initialized those buffers
+	// one by one by enabling AttribArrays, using AttribPointers, and an array of VBO's
+	// (VBO[0] = positions, VBO[1] = colors, etc...)
 
-	unsigned int NumVertices = 0;
-	unsigned int NumIndices = 0;
+	// Instead of this, I'm making a struct of everything I need as one single big VBO
+	// and enabling the AttribArray for the things I need in shaders.
 
-	/* Count the number of vertices and indices */
+	// (DEFINED IN HEADER)
+//	std::vector<glm::vec3> Positions;
+//	std::vector<glm::vec3> _colors;
+//	std::vector<glm::vec2> TexCoords;
+//	std::vector<glm::vec3> Normals;
+//	std::vector<VertexBoneData> Bones;
+//	std::vector<unsigned int> Indices;
+
+	unsigned int numVertices = 0;
+	unsigned int numIndices = 0;
+
+	// Get count of vertices and indices
 	for (unsigned int i = 0; i < m_Entries.size(); i++)
 	{
 		m_Entries[i].MaterialIndex = pScene->mMeshes[i]->mMaterialIndex;
 		m_Entries[i].NumIndices = pScene->mMeshes[i]->mNumFaces * 3;
-		m_Entries[i].BaseVertex = NumVertices;
-		m_Entries[i].BaseIndex = NumIndices;
+		m_Entries[i].BaseVertex = numVertices;
+		m_Entries[i].BaseIndex = numIndices;
 
-		NumVertices += pScene->mMeshes[i]->mNumVertices;
-		NumIndices += m_Entries[i].NumIndices;
+		numVertices += pScene->mMeshes[i]->mNumVertices;
+		numIndices += m_Entries[i].NumIndices;
 	}
 
+	printf("Vertices: %i\n", numVertices);
+	printf("Indices: %i\n", numIndices);
+
 	// Reserve space in the vectors for the vertex attributes and indices
-	Positions.reserve(NumVertices);
-	_colors.reserve(NumVertices);
-	TexCoords.reserve(NumVertices);
-	Normals.reserve(NumVertices);
-	Bones.resize(NumVertices);
-	Indices.reserve(NumIndices);
+	vertices = new PerVertexData[468]; // 76 bytes/element. 1884 vertices throws MAV, 3080 is fine??
+	indices = new GLuint[3080]; // 4 bytes/element
+	if (vertices == nullptr) std::cout << "Memory could not be allocated\n";
+	if (indices == nullptr) std::cout << "Memory could not be allocated\n";
+
+//	for (unsigned int k = 0; k < 1884; k++)
+//	{
+//		vertices->bone.Reset();
+//		printf("%f\n", vertices->bone.Weights[0]);
+//	}
+
+	//	vertices.position.reserve(numVertices);
+	//	vertices.colors.reserve(numVertices);
+	//	vertices.texCoords.reserve(numVertices);
+	//	vertices.normals.reserve(numVertices);
+	//	vertices.bones.resize(numVertices);
+	//
+	//	vertices.indices.reserve(numIndices);
+
+	std::cout << "BEFORE INIT MESH [%i]" << numIndices << ".\n";
+	for (unsigned int iter = 0; iter < numIndices; iter++)
+	{
+		printf("Indices [%i]: {%i, %i, %i}\n", iter, *(indices + 3 * iter), *(indices + 3 * iter + 1), *(indices + 3 * iter + 2));
+	}
 
 	// Initialize the meshes in the scene one by one
 	for (unsigned int i = 0; i < m_Entries.size(); i++)
 	{
 		const aiMesh* paiMesh = pScene->mMeshes[i]; // Get mesh...
-		InitMesh(i, paiMesh, Positions, _colors, TexCoords, Normals, Bones, Indices); // ...init mesh!
+		InitMesh(i, paiMesh, vertices, indices); // ...feed mesh vertex buffer data into fVBO!
+	}
+
+	std::cout << "AFTER INIT MESH [%i]" << numIndices << ".\n";
+	for (unsigned int iter = 0; iter < numIndices; iter++)
+	{
+		printf("Indices [%i]: {%i, %i, %i}\n", iter, *(indices + 3 * iter), *(indices + 3 * iter + 1), *(indices + 3 * iter + 2));
 	}
 
 	// Init the material
 	if (!InitMaterials(pScene, fileName))
 	{
+		DEBUG_LOG("SkinnedMesh", LOG_ERROR, "Could not initialize materials from loaded scene!");
 		return false;
 	}
 
-	// Generate and populate the buffers with vertex attributes and indices 
-	glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[POS_VB]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Positions[0]) * Positions.size(), &Positions[0], GL_STATIC_DRAW);
+	// Generate and populate the buffers with vertex attributes and indices
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(vertices[0]), vertices, GL_STATIC_DRAW);
+
+	// if (numIndices > 0) {
+	glGenBuffers(1, &m_EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(indices[0]), indices, GL_STATIC_DRAW);
+	// }
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(PerVertexData), (GLvoid*)offsetof(PerVertexData, position));
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[COLOR_VB]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(_colors[0]) * _colors.size(), &_colors[0], GL_STATIC_DRAW);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(PerVertexData), (GLvoid*)offsetof(PerVertexData, color));
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[TEXCOORD_VB]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(TexCoords[0]) * TexCoords.size(), &TexCoords[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(PerVertexData), (GLvoid*)offsetof(PerVertexData, texCoord));
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[NORMAL_VB]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Normals[0]) * Normals.size(), &Normals[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(PerVertexData), (GLvoid*)offsetof(PerVertexData, normal));
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[BONE_VB]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Bones[0]) * Bones.size(), &Bones[0], GL_STATIC_DRAW);
-	// Bone ID location
+	glVertexAttribPointer(4, 4, GL_INT, GL_FALSE, sizeof(PerVertexData), (GLvoid*)offsetof(PerVertexData, bone.IDs)); // CONCERN
 	glEnableVertexAttribArray(4);
-	glVertexAttribIPointer(4, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
-	// Bone weight location
+
+	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(PerVertexData), (GLvoid*)offsetof(PerVertexData, bone.Weights));
 	glEnableVertexAttribArray(5);
-	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[INDEX_BUFFER]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices[0]) * Indices.size(), &Indices[0], GL_STATIC_DRAW);
 
 	
+	std::cout << "POSITION: " << vertices[0].position.x << ", " << vertices[0].position.y << ", " << vertices[0].position.z << "\n";
+	std::cout << "COLOR: " << vertices[0].color.x << ", " << vertices[0].color.y << ", " << vertices[0].color.z << "\n";
+	std::cout << "TEXCOORD: " << vertices[0].normal.x << ", " << vertices[0].normal.y << "\n";
+	std::cout << "BONE ID: " <<
+		vertices[0].bone.IDs[0] << ", "
+		<< vertices[0].bone.IDs[1] << ", "
+		<< vertices[0].bone.IDs[2] << ", "
+		<< vertices[0].bone.IDs[3]
+		<< "\n";
+	std::cout << "BONE WEIGHT: " <<
+		vertices[0].bone.Weights[0] << ", "
+		<< vertices[0].bone.Weights[1] << ", "
+		<< vertices[0].bone.Weights[2] << ", "
+		<< vertices[0].bone.Weights[3]
+		<< "\n";
 
-	
-	
-	
-	
-	
+	// These are all 1???
+	for (unsigned int n = 0; n < numIndices; n++) std::cout << "Indice " << n << ": " << indices[0] << "\n";
 
-	
+/*	glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[POS_VB]);																*/
+/*	glBufferData(GL_ARRAY_BUFFER, sizeof(Positions[0]) * Positions.size(), &Positions[0], GL_STATIC_DRAW);			*/
+/*	glEnableVertexAttribArray(0);																					*/
+/*	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);															*/
+/*																													*/
+/*	glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[COLOR_VB]);																*/
+/*	glBufferData(GL_ARRAY_BUFFER, sizeof(_colors[0]) * _colors.size(), &_colors[0], GL_STATIC_DRAW);				*/
+/*	glEnableVertexAttribArray(1);																					*/
+/*	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);															*/
+/*																													*/
+/*	glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[TEXCOORD_VB]);															*/
+/*	glBufferData(GL_ARRAY_BUFFER, sizeof(TexCoords[0]) * TexCoords.size(), &TexCoords[0], GL_STATIC_DRAW);			*/
+/*	glEnableVertexAttribArray(2);																					*/
+/*	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);															*/
+/*																													*/
+/*	glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[NORMAL_VB]);															*/
+/*	glBufferData(GL_ARRAY_BUFFER, sizeof(Normals[0]) * Normals.size(), &Normals[0], GL_STATIC_DRAW);				*/
+/*	glEnableVertexAttribArray(3);																					*/
+/*	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);															*/
+/*																													*/
+/*	glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[BONE_VB]);																*/
+/*	glBufferData(GL_ARRAY_BUFFER, sizeof(Bones[0]) * Bones.size(), &Bones[0], GL_STATIC_DRAW);						*/
+/*	// Bone ID location																								*/
+/*	glEnableVertexAttribArray(4);																					*/
+/*	glVertexAttribIPointer(4, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);									*/
+/*	// Bone weight location																							*/
+/*	glEnableVertexAttribArray(5);																					*/
+/*	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);						*/
+/*																													*/
+/*	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[INDEX_BUFFER]);													*/
+/*	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices[0]) * Indices.size(), &Indices[0], GL_STATIC_DRAW);		*/
+
 	return (glGetError() == GL_NO_ERROR);
 }
 
-void SkinnedMesh::InitMesh(unsigned int MeshIndex,
-	const aiMesh* paiMesh,
-	std::vector<glm::vec3>& Positions,
-	std::vector<glm::vec3>& Colors,
-	std::vector<glm::vec2>& TexCoords,
-	std::vector<glm::vec3>& Normals,
-	std::vector<VertexBoneData>& Bones,
-	std::vector<GLuint>& Indices)
+void SkinnedMesh::InitMesh(unsigned int MeshIndex, const aiMesh* paiMesh, PerVertexData* vertices, GLuint* indices)
 {
 	const aiVector3D Zero3D(0.0f, 0.0f, 0.0f);
 
@@ -235,40 +348,57 @@ void SkinnedMesh::InitMesh(unsigned int MeshIndex,
 		const aiVector3D* pTexCoord = paiMesh->HasTextureCoords(0) ? &(paiMesh->mTextureCoords[0][i]) : &Zero3D;
 
 		/* store pos normal texCoord */
-		Positions.push_back(glm::vec3(pPos->x, pPos->y, pPos->z));
+//		fVBO.vertices.push_back(glm::vec3(pPos->x, pPos->y, pPos->z));
+		vertices[i].position = glm::vec3(pPos->x, pPos->y, pPos->z);
 
 		if (paiMesh->HasNormals())
 		{
 			const aiVector3D* pNormal = &(paiMesh->mNormals[i]);
-			Normals.push_back(glm::vec3(pNormal->x, pNormal->y, pNormal->z));
-		}
-		TexCoords.push_back(glm::vec2(pTexCoord->x, pTexCoord->y));
 
-		// My addition: colors
-		Colors.push_back(glm::vec3(1.0f));
+//			fVBO.normals.push_back(glm::vec3(pNormal->x, pNormal->y, pNormal->z));
+			vertices[i].normal = glm::vec3(pNormal->x, pNormal->y, pNormal->z);
+		}
+//		fVBO.texCoords.push_back(glm::vec2(pTexCoord->x, pTexCoord->y));
+		vertices[i].texCoord = glm::vec2(pTexCoord->x, pTexCoord->y);
+
+		// TODO: colors
+//		fVBO.colors.push_back(glm::vec3(1.0f));
+		vertices[i].color = glm::vec3(1.0f);
 	}
 
-	/* Load bones */
-	LoadBones(MeshIndex, paiMesh, Bones);
+	// Load bones
+	LoadBones(MeshIndex, paiMesh, vertices);
 
-	/* Populate the index buffer */
-	for (unsigned int i = 0; i < paiMesh->mNumFaces; ++i)
+	// Populate index buffer
+	for (unsigned int fn = 0; fn < paiMesh->mNumFaces; ++fn)
 	{
-		const aiFace& Face = paiMesh->mFaces[i];
-		/* if mNumIndices != 3 then worning */
-		assert(Face.mNumIndices == 3);
-		Indices.push_back(Face.mIndices[0]);
-		Indices.push_back(Face.mIndices[1]);
-		Indices.push_back(Face.mIndices[2]);
+
+		const aiFace& face = paiMesh->mFaces[fn];
+
+		if (face.mNumIndices != 3)
+		{
+			DEBUG_LOG("SkinnedMesh", LOG_WARN, "Face [%i] has [%i] indices, expected 3!", fn, face.mNumIndices);
+		}
+
+	//	fVBO.indices.push_back(Face.mIndices[0]);
+	//	fVBO.indices.push_back(Face.mIndices[1]);
+	//	fVBO.indices.push_back(Face.mIndices[2]);
+		std::cout << "Found {" << face.mIndices[0] << ", " << face.mIndices[1] << ", " << face.mIndices[2] << "}\n";
+
+		indices[3*fn] = face.mIndices[0];
+		indices[3*fn + 1] = face.mIndices[1];
+		indices[3*fn + 2] = face.mIndices[2];
+
+		std::cout << "Set as {" << indices[3 * fn] << ", " << indices[3 * fn + 1] << ", " << indices[3 * fn + 2] << "}\n";
 	}
 }
 
-void SkinnedMesh::LoadBones(unsigned int MeshIndex, const aiMesh* pMesh, std::vector<VertexBoneData>& Bones)
+void SkinnedMesh::LoadBones(unsigned int MeshIndex, const aiMesh* pMesh, PerVertexData* boneSource)
 {
-	/* Load bones one by one */
-
+	// For every bone,
 	for (unsigned int i = 0; i < pMesh->mNumBones; ++i)
 	{
+		// Importing
 		unsigned int BoneIndex = 0;
 		std::string BoneName(pMesh->mBones[i]->mName.data);
 
@@ -288,16 +418,18 @@ void SkinnedMesh::LoadBones(unsigned int MeshIndex, const aiMesh* pMesh, std::ve
 			BoneIndex = m_BoneMapping[BoneName];
 		}
 
+		// Assigning
 		for (unsigned int j = 0; j < pMesh->mBones[i]->mNumWeights; ++j)
 		{
 			unsigned int VertexID = m_Entries[MeshIndex].BaseVertex + pMesh->mBones[i]->mWeights[j].mVertexId;
 			float Weight = pMesh->mBones[i]->mWeights[j].mWeight;
-			Bones[VertexID].AddBoneData(BoneIndex, Weight);
+		//	Bones[VertexID].AddBoneData(BoneIndex, Weight);
+			boneSource[VertexID].bone.AddBoneData(BoneIndex, Weight);
 		}
 	}
 }
 
-bool SkinnedMesh::InitMaterials(const aiScene* pScene, const std::string& Filename)
+bool SkinnedMesh::InitMaterials(const aiScene* pScene, const std::string& Filename) noexcept
 {
 	// Extract the directory part from the file name
 	std::string::size_type SlashIndex = Filename.find_last_of("/");
@@ -353,11 +485,12 @@ bool SkinnedMesh::InitMaterials(const aiScene* pScene, const std::string& Filena
 void SkinnedMesh::Draw(Shader* shader)
 {
 	// Update model matrix ?
-	// Update uniforms ?
+	// Update uniforms ? (shader)
 
 	glBindVertexArray(m_VAO);
 
-	for (unsigned int i = 0; i < m_Entries.size(); i++) {
+	for (unsigned int i = 0; i < m_Entries.size(); i++)
+	{
 		const uint64_t MaterialIndex = m_Entries[i].MaterialIndex;
 
 		if (!(MaterialIndex < m_Textures.size()))
@@ -365,7 +498,9 @@ void SkinnedMesh::Draw(Shader* shader)
 			DEBUG_LOG("SkinnedMesh", LOG_ERROR, "Material index exceeds texture size!");
 		}
 
-		glDrawElementsBaseVertex(GL_TRIANGLES,
+	//	glDrawElements(GL_TRIANGLES, m_Entries[i].NumIndices, GL_UNSIGNED_INT, 0);
+ 		glDrawElementsBaseVertex(
+			GL_TRIANGLES,
 			m_Entries[i].NumIndices,
 			GL_UNSIGNED_INT,
 			(void*)(sizeof(unsigned int) * m_Entries[i].BaseIndex),
@@ -565,3 +700,9 @@ const aiNodeAnim* SkinnedMesh::FindNodeAnim(const aiAnimation* pAnimation, const
 
 	return NULL;
 }
+
+
+// -----------------------
+
+
+#endif

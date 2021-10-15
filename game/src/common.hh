@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdint.h>
 
 #define _________CIRNOPRISM_DEVELOPMENT_DEBUG
 
