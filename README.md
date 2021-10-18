@@ -2,14 +2,15 @@
 
 ![logo](game/res/textures/web/cirnoprism_logo.png)
 
-An experiment with integrating GGPO with a very rudimentary first-person 3D game renderer (GLFW/OpenGL).
+An experiment with integrating GGPO networking with a 3D game renderer using GLFW/OpenGL.
+> NOTE: This project uses the ISO C++17 standard (`/std:c++17` on msvc)
 
-## Building from CMake
+### Libraries and includes
+[GLEW](https://github.com/nigels-com/glew)<br>
+[GLFW](https://github.com/glfw/glfw)<br>
+[SOIL2](https://github.com/SpartanJ/SOIL2)<br>
+[OpenAL-soft](https://github.com/kcat/openal-soft)<br>
+[GLM](https://github.com/g-truc/glm)<br>
+
+### Building from CMake
 -todo-
-
-### Required build dependencies
-GLEW<br>
-GLFW<br>
-GLM<br>
-SOIL2<br>
-OpenAL-soft<br>
